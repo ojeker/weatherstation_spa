@@ -15,15 +15,14 @@ import {
 import { mapCurrentReading, mapHourlyReading } from "./row-mapper";
 import { filterTodayReadings } from "./zurich-time";
 
-const BASE_URL =
-  "https://data.geo.admin.ch/ch.meteoschweiz.messwerte-aktuell/VQHA80";
+const BASE_URL = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn";
 
 function buildCurrentUrl(token: string): string {
-  return `${BASE_URL}/ogd-smn_${token}_t_now.csv`;
+  return `${BASE_URL}/${token}/ogd-smn_${token}_t_now.csv`;
 }
 
 function buildHourlyUrl(token: string): string {
-  return `${BASE_URL}/ogd-smn_${token}_h_now.csv`;
+  return `${BASE_URL}/${token}/ogd-smn_${token}_h_now.csv`;
 }
 
 /** MeteoSwiss implementation of WeatherRepository. */

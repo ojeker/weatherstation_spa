@@ -11,11 +11,11 @@ defineProps<{
     <div class="temperature">{{ temperature }}</div>
     <div class="details">
       <span class="detail">
-        <span class="icon">☀</span>
+        <span class="icon icon-sun">☀</span>
         <span class="value">{{ sunshine }}</span>
       </span>
       <span class="detail">
-        <span class="icon">💧</span>
+        <span class="icon icon-rain">💧</span>
         <span class="value">{{ precipitation }}</span>
       </span>
     </div>
@@ -32,7 +32,7 @@ defineProps<{
 
 .temperature {
   font-size: 4rem;
-  font-weight: 300;
+  font-weight: 700;
   line-height: 1;
   color: #222;
 }
@@ -53,6 +53,10 @@ defineProps<{
 
 .icon {
   font-size: 1rem;
+}
+
+.icon-sun {
+  color: #f1c40f;
 }
 
 .value {

@@ -8,14 +8,10 @@ import {
   formatPrecipitation,
   formatTime,
   getLastNReadings,
-  generateTempSpark,
-  generateSunshineSpark,
-  generatePrecipSpark,
-  getHourLabels,
 } from "../utils";
 import StationHeader from "../components/StationHeader.vue";
 import CurrentReading from "../components/CurrentReading.vue";
-import HourlyOverview from "../components/HourlyOverview.vue";
+import HourlyChart from "../components/HourlyChart.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 import ErrorState from "../components/ErrorState.vue";
 import EmptyState from "../components/EmptyState.vue";
@@ -66,11 +62,6 @@ const hourlyReadings = computed(() => {
   return getLastNReadings(state.value.data.hourly as Reading[], SPARK_BAR_COUNT);
 });
 
-const tempSpark = computed(() => generateTempSpark(hourlyReadings.value));
-const sunSpark = computed(() => generateSunshineSpark(hourlyReadings.value, "hourly"));
-const rainSpark = computed(() => generatePrecipSpark(hourlyReadings.value));
-const hourLabels = computed(() => getHourLabels(hourlyReadings.value));
-
 const isEmpty = computed(() => {
   if (state.value.status !== "success") return false;
   return !state.value.data.current && state.value.data.hourly.length === 0;
@@ -103,12 +94,9 @@ const isEmpty = computed(() => {
             :precipitation="currentPrecip"
           />
 
-          <HourlyOverview
+          <HourlyChart
             v-if="hourlyReadings.length > 0"
-            :temp="tempSpark"
-            :sun="sunSpark"
-            :rain="rainSpark"
-            :hour-labels="hourLabels"
+            :readings="hourlyReadings"
           />
         </div>
       </template>

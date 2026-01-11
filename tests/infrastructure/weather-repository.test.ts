@@ -133,10 +133,10 @@ describe("MeteoSwissWeatherRepository", () => {
     }
 
     expect(mockedFetchText).toHaveBeenCalledWith(
-      expect.stringContaining("ogd-smn_goe_t_now.csv")
+      expect.stringContaining("/goe/ogd-smn_goe_t_now.csv")
     );
     expect(mockedFetchText).toHaveBeenCalledWith(
-      expect.stringContaining("ogd-smn_goe_h_now.csv")
+      expect.stringContaining("/goe/ogd-smn_goe_h_now.csv")
     );
   });
 });

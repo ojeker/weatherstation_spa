@@ -94,28 +94,28 @@ The CSV includes a `station_abbr` column (e.g. `GOE`) but station selection is d
 
 ## Acceptance criteria (v1.0)
 Data & logic:
-- [ ] App loads the default station via StationProvider (GOE).
-- [ ] App fetches `t_now` and `h_now` CSV files for the station token.
-- [ ] App validates required columns for each file and throws a typed error if missing.
-- [ ] App parses timestamps `DD.MM.YYYY HH:mm` and filters for "today" in Europe/Zurich.
-- [ ] App selects the latest `t_now` row for the current reading.
-- [ ] App builds hourly series from all `h_now` rows for today, sorted ascending.
-- [ ] No hourly aggregation fallback is implemented.
+- [x] App loads the default station via StationProvider (GOE).
+- [x] App fetches `t_now` and `h_now` CSV files for the station token.
+- [x] App validates required columns for each file and throws a typed error if missing.
+- [x] App parses timestamps `DD.MM.YYYY HH:mm` and filters for "today" in Europe/Zurich.
+- [x] App selects the latest `t_now` row for the current reading.
+- [x] App builds hourly series from all `h_now` rows for today, sorted ascending.
+- [x] No hourly aggregation fallback is implemented.
 
 UI:
-- [ ] Current card renders values and timestamp.
-- [ ] Charts render hourly series for today.
-- [ ] Loading, error, and empty-data states are clear and user-friendly.
-- [ ] Retry triggers a re-fetch.
+- [x] Current card renders values and timestamp.
+- [x] Charts render hourly series for today (implemented as spark bars per user preference).
+- [x] Loading, error, and empty-data states are clear and user-friendly.
+- [x] Retry triggers a re-fetch.
 
 Testing:
-- [ ] Unit tests cover CSV parsing, schema validation, timestamp parsing, Zurich "today" filtering, current selection, and hourly ordering.
-- [ ] Unit tests do not hit the network (mock HttpClient / use fixtures).
-- [ ] E2E tests intercept network calls and test:
+- [x] Unit tests cover CSV parsing, schema validation, timestamp parsing, Zurich "today" filtering, current selection, and hourly ordering.
+- [x] Unit tests do not hit the network (mock HttpClient / use fixtures).
+- [x] E2E tests intercept network calls and test:
   - happy path
   - schema mismatch
   - network error
-- [ ] `npm run test:unit` and `npm run test:e2e` pass.
+- [x] `npm run test:unit` and `npm run test:e2e` pass.
 
 ## Out of scope for v1.0
 - Choosing closest station (v1.1)
