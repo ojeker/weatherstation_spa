@@ -13,6 +13,7 @@ const MAX_SUNSHINE_MINUTES: Record<ReadingKind, number> = {
   hourly: 60,
 };
 
+/** A single weather measurement with temperature, sunshine, and precipitation data. */
 export class Reading {
   private constructor(
     readonly timestamp: Timestamp,

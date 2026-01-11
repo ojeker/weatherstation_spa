@@ -1,0 +1,125 @@
+import { describe, expect, it } from "vitest";
+import { InvalidValueError } from "@/domain";
+import {
+  parseNumericValue,
+  mapCurrentReading,
+  mapHourlyReading,
+} from "@/infrastructure";
+
+describe("parseNumericValue", () => {
+  it("parses valid numeric string", () => {
+    expect(parseNumericValue("12.3", "field")).toBe(12.3);
+  });
+
+  it("parses negative numbers", () => {
+    expect(parseNumericValue("-5.5", "field")).toBe(-5.5);
+  });
+
+  it("parses integers", () => {
+    expect(parseNumericValue("42", "field")).toBe(42);
+  });
+
+  it("returns null for empty string", () => {
+    expect(parseNumericValue("", "field")).toBeNull();
+  });
+
+  it("returns null for whitespace-only string", () => {
+    expect(parseNumericValue("   ", "field")).toBeNull();
+  });
+
+  it("throws InvalidValueError for non-numeric string", () => {
+    expect(() => parseNumericValue("abc", "field")).toThrow(InvalidValueError);
+  });
+
+  it("throws InvalidValueError for NaN", () => {
+    expect(() => parseNumericValue("NaN", "field")).toThrow(InvalidValueError);
+  });
+
+  it("throws InvalidValueError for Infinity", () => {
+    expect(() => parseNumericValue("Infinity", "field")).toThrow(
+      InvalidValueError
+    );
+  });
+
+  it("includes field name in error message", () => {
+    expect(() => parseNumericValue("abc", "temperature")).toThrow(
+      /temperature/
+    );
+  });
+});
+
+describe("mapCurrentReading", () => {
+  it("maps valid row to Reading", () => {
+    const row = {
+      reference_timestamp: "11.01.2026 13:20",
+      tre200s0: "12.3",
+      sre000z0: "8",
+      rre150z0: "0.5",
+    };
+
+    const reading = mapCurrentReading(row);
+
+    expect(reading.temperatureC).toBe(12.3);
+    expect(reading.sunshineMinutes).toBe(8);
+    expect(reading.precipitationMm).toBe(0.5);
+    expect(reading.kind).toBe("ten-minute");
+  });
+
+  it("handles null values for optional fields", () => {
+    const row = {
+      reference_timestamp: "11.01.2026 13:20",
+      tre200s0: "12.3",
+      sre000z0: "",
+      rre150z0: "",
+    };
+
+    const reading = mapCurrentReading(row);
+
+    expect(reading.temperatureC).toBe(12.3);
+    expect(reading.sunshineMinutes).toBeNull();
+    expect(reading.precipitationMm).toBeNull();
+  });
+
+  it("throws when temperature is missing", () => {
+    const row = {
+      reference_timestamp: "11.01.2026 13:20",
+      tre200s0: "",
+      sre000z0: "8",
+      rre150z0: "0.5",
+    };
+
+    expect(() => mapCurrentReading(row)).toThrow(InvalidValueError);
+  });
+});
+
+describe("mapHourlyReading", () => {
+  it("maps valid row to Reading", () => {
+    const row = {
+      reference_timestamp: "11.01.2026 12:00",
+      tre200h0: "11.5",
+      sre000h0: "45",
+      rre150h0: "1.2",
+    };
+
+    const reading = mapHourlyReading(row);
+
+    expect(reading.temperatureC).toBe(11.5);
+    expect(reading.sunshineMinutes).toBe(45);
+    expect(reading.precipitationMm).toBe(1.2);
+    expect(reading.kind).toBe("hourly");
+  });
+
+  it("handles null values for optional fields", () => {
+    const row = {
+      reference_timestamp: "11.01.2026 12:00",
+      tre200h0: "11.5",
+      sre000h0: "",
+      rre150h0: "",
+    };
+
+    const reading = mapHourlyReading(row);
+
+    expect(reading.sunshineMinutes).toBeNull();
+    expect(reading.precipitationMm).toBeNull();
+  });
+});

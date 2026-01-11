@@ -2,6 +2,7 @@ import { InvalidValueError } from "./errors";
 
 const TIMESTAMP_PATTERN = /^(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2})$/;
 
+/** Immutable UTC timestamp parsed from DD.MM.YYYY HH:mm format. */
 export class Timestamp {
   private constructor(private readonly value: Date) {}
 

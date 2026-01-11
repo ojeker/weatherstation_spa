@@ -3,6 +3,7 @@ import { InvalidValueError } from "./errors";
 const TOKEN_PATTERN = /^[a-z0-9]+$/;
 const ABBR_PATTERN = /^[A-Z0-9]{2,10}$/;
 
+/** Identifies a weather station by its unique token and display abbreviation. */
 export class Station {
   private constructor(
     readonly token: string,
