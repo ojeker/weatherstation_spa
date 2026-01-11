@@ -76,6 +76,7 @@ The CSV includes a `station_abbr` column (e.g. `GOE`) but station selection is d
     - sunshine hourly: `sre000h0`
     - precipitation hourly: `rre150h0`
 
+- UI must adapt to smartphone, tablet and desktop screen size and orientation.
 - Loading state:
   - shows a spinner/skeleton while loading
 - Error state:
