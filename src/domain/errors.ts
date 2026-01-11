@@ -1,8 +1,11 @@
 /** Base error class for all domain-level errors. */
 export class DomainError extends Error {
+  readonly cause?: unknown;
+
   constructor(message: string, options?: { cause?: unknown }) {
-    super(message, options);
+    super(message);
     this.name = this.constructor.name;
+    this.cause = options?.cause;
   }
 }
 
