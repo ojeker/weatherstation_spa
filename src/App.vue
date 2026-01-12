@@ -4,6 +4,9 @@ import Dashboard from "./ui/pages/Dashboard.vue";
 
 <template>
   <Dashboard />
+  <footer class="app-footer">
+    Datasources: MeteoSwiss, ©swisstopo
+  </footer>
 </template>
 
 <style>
@@ -24,5 +27,14 @@ html {
 
 body {
   background: #fafafa;
+}
+
+.app-footer {
+  margin-top: 0.8rem;
+  padding: 0.4rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888;
+  border-top: 1px solid #e5e7eb;
 }
 </style>

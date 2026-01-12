@@ -122,8 +122,6 @@ const isEmpty = computed(() => {
 
 <style scoped>
 .dashboard {
-  min-height: 100vh;
-  min-height: 100dvh;
   background: #fafafa;
 }
 
