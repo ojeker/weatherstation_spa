@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, nextTick, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onMounted,
+  ref,
+  watch,
+  type ComponentPublicInstance,
+} from "vue";
 import { usePlaceSelection } from "@/ui/composables";
 import { formatDistanceKm } from "@/ui/utils";
 import LoadingSpinner from "@/ui/components/LoadingSpinner.vue";
@@ -25,7 +32,7 @@ const {
 } = usePlaceSelection();
 
 const activeIndex = ref(-1);
-const optionRefs = ref<HTMLElement[]>([]);
+const optionRefs = ref<Element[]>([]);
 
 onMounted(() => {
   loadPlaces();
@@ -41,9 +48,15 @@ const placeStatusMessage = computed(() => {
   return null;
 });
 
-function setOptionRef(el: Element | null, index: number) {
+function setOptionRef(
+  el: Element | ComponentPublicInstance | null,
+  index: number
+) {
   if (!el) return;
-  optionRefs.value[index] = el as HTMLElement;
+  const element = el instanceof Element ? el : (el.$el as Element | null);
+  if (element) {
+    optionRefs.value[index] = element;
+  }
 }
 
 function updateActiveIndex(nextIndex: number) {
