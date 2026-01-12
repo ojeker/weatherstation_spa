@@ -5,6 +5,7 @@ export {
   getLastNReadings,
   formatSunshinePercent,
   formatPrecipitation,
+  formatDistanceKm,
   formatTemperature,
   formatWindSpeed,
   formatWindDirection,
@@ -13,3 +14,8 @@ export {
   getHourLabels,
   type SparkData,
 } from "./formatting";
+export {
+  normalizeQuery,
+  isNumericQuery,
+  filterPlaces,
+} from "./place-search";

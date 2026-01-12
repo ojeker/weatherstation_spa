@@ -8,7 +8,7 @@ import {
 import { LoadTodayWeatherUseCase } from "@/application";
 
 describe("LoadTodayWeatherUseCase", () => {
-  const mockStation = Station.create({ token: "goe", abbreviation: "GOE" });
+  const mockStation = Station.create({ abbreviation: "GOE" });
 
   const mockWeather: TodayWeather = {
     current: null,
@@ -18,6 +18,7 @@ describe("LoadTodayWeatherUseCase", () => {
   it("gets station from provider and fetches weather", async () => {
     const mockStationProvider: StationProvider = {
       getStation: vi.fn().mockReturnValue(mockStation),
+      setStation: vi.fn(),
     };
 
     const mockWeatherRepository: WeatherRepository = {
@@ -41,6 +42,7 @@ describe("LoadTodayWeatherUseCase", () => {
   it("propagates errors from weather repository", async () => {
     const mockStationProvider: StationProvider = {
       getStation: vi.fn().mockReturnValue(mockStation),
+      setStation: vi.fn(),
     };
 
     const mockWeatherRepository: WeatherRepository = {
@@ -57,13 +59,14 @@ describe("LoadTodayWeatherUseCase", () => {
 
   it("uses station from provider for each execution", async () => {
     const stations = [
-      Station.create({ token: "goe", abbreviation: "GOE" }),
-      Station.create({ token: "klz", abbreviation: "KLZ" }),
+      Station.create({ abbreviation: "GOE" }),
+      Station.create({ abbreviation: "KLZ" }),
     ];
 
     let callCount = 0;
     const mockStationProvider: StationProvider = {
       getStation: vi.fn().mockImplementation(() => stations[callCount++]),
+      setStation: vi.fn(),
     };
 
     const mockWeatherRepository: WeatherRepository = {

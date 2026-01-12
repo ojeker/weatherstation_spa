@@ -71,5 +71,3 @@ export class Timestamp {
     return this.value.toISOString();
   }
 }
-
-export const timestampPattern = TIMESTAMP_PATTERN;

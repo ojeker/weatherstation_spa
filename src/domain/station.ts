@@ -1,31 +1,16 @@
 import { InvalidValueError } from "./errors";
 
-const TOKEN_PATTERN = /^[a-z0-9]+$/;
 const ABBR_PATTERN = /^[A-Z0-9]{2,10}$/;
 
-/** Identifies a weather station by its unique token and display abbreviation. */
+/** Identifies a weather station by its display abbreviation. */
 export class Station {
-  private constructor(
-    readonly token: string,
-    readonly abbreviation: string,
-  ) {}
+  private constructor(readonly abbreviation: string) {}
 
-  static create(params: { token: string; abbreviation: string }): Station {
-    const token = params.token?.trim();
+  static create(params: { abbreviation: string }): Station {
     const abbreviation = params.abbreviation?.trim();
-
-    if (!token) {
-      throw new InvalidValueError("Station token is required.");
-    }
 
     if (!abbreviation) {
       throw new InvalidValueError("Station abbreviation is required.");
-    }
-
-    if (!TOKEN_PATTERN.test(token)) {
-      throw new InvalidValueError(
-        "Station token must be lowercase alphanumeric characters.",
-      );
     }
 
     const normalizedAbbreviation = abbreviation.toUpperCase();
@@ -35,8 +20,6 @@ export class Station {
       );
     }
 
-    return new Station(token, normalizedAbbreviation);
+    return new Station(normalizedAbbreviation);
   }
 }
-
-export const stationTokenPattern = TOKEN_PATTERN;

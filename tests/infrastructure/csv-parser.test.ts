@@ -24,6 +24,14 @@ bar;20;2`;
     expect(rows[0]).toEqual({ name: "foo", value: "10" });
   });
 
+  it("strips UTF-8 BOM from the first header cell", () => {
+    const csv = `\uFEFFOrtschaftsname;PLZ4\nZurich;8001`;
+
+    const rows = parseCsv(csv);
+
+    expect(rows[0]).toEqual({ Ortschaftsname: "Zurich", PLZ4: "8001" });
+  });
+
   it("handles Windows line endings (CRLF)", () => {
     const csv = "name;value\r\nfoo;10\r\nbar;20";
 

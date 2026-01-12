@@ -49,14 +49,14 @@ describe("ErrorState", () => {
 });
 
 describe("EmptyState", () => {
-  it("displays station abbreviation in message", () => {
+  it("displays station name in message", () => {
     const wrapper = mount(EmptyState, {
       props: {
-        stationAbbr: "GOE",
+        stationName: "Zurich Fluntern",
       },
     });
 
-    expect(wrapper.text()).toContain("GOE");
+    expect(wrapper.text()).toContain("Zurich Fluntern");
     expect(wrapper.text()).toContain("No data available");
   });
 });

@@ -21,6 +21,21 @@ export const HOURLY_READING_COLUMNS = [
   "pp0qnhh0",
 ] as const;
 
+export const PLACE_COLUMNS = [
+  "Ortschaftsname",
+  "PLZ4",
+  "E",
+  "N",
+] as const;
+
+export const STATION_META_COLUMNS = [
+  "station_abbr",
+  "station_name",
+  "station_height_masl",
+  "station_coordinates_lv95_east",
+  "station_coordinates_lv95_north",
+] as const;
+
 /** Validates that all required columns exist in the CSV rows. */
 export function validateRequiredColumns(
   rows: CsvRow[],

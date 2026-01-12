@@ -1,6 +1,6 @@
 <script setup lang="ts">
 defineProps<{
-  stationAbbr: string;
+  stationName: string;
 }>();
 </script>
 
@@ -8,7 +8,7 @@ defineProps<{
   <div class="empty-state">
     <div class="icon">📭</div>
     <p class="message">
-      No data available for today for station {{ stationAbbr }}.
+      No data available for today for station {{ stationName }}.
     </p>
   </div>
 </template>

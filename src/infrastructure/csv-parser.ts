@@ -13,7 +13,13 @@ export function parseCsv(content: string): CsvRow[] {
   }
 
   const headerLine = lines[0];
-  const headers = headerLine.split(";").map((h) => h.trim());
+  const headers = headerLine.split(";").map((h, index) => {
+    const trimmed = h.trim();
+    if (index === 0) {
+      return trimmed.replace(/^\uFEFF/, "");
+    }
+    return trimmed;
+  });
 
   if (headers.length === 0 || headers.every((h) => h === "")) {
     throw new CsvParseError("CSV header row is empty.");

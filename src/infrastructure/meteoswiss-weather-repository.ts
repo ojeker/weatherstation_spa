@@ -17,11 +17,13 @@ import { filterTodayReadings } from "./zurich-time";
 
 const BASE_URL = "https://data.geo.admin.ch/ch.meteoschweiz.ogd-smn";
 
-function buildCurrentUrl(token: string): string {
+function buildCurrentUrl(abbreviation: string): string {
+  const token = abbreviation.toLowerCase();
   return `${BASE_URL}/${token}/ogd-smn_${token}_t_now.csv`;
 }
 
-function buildHourlyUrl(token: string): string {
+function buildHourlyUrl(abbreviation: string): string {
+  const token = abbreviation.toLowerCase();
   return `${BASE_URL}/${token}/ogd-smn_${token}_h_now.csv`;
 }
 
@@ -59,7 +61,7 @@ export class MeteoSwissWeatherRepository implements WeatherRepository {
   }
 
   private async fetchCurrentReadings(station: Station): Promise<Reading[]> {
-    const url = buildCurrentUrl(station.token);
+    const url = buildCurrentUrl(station.abbreviation);
     const content = await fetchText(url);
     const rows = parseCsv(content);
 
@@ -70,7 +72,7 @@ export class MeteoSwissWeatherRepository implements WeatherRepository {
   }
 
   private async fetchHourlyReadings(station: Station): Promise<Reading[]> {
-    const url = buildHourlyUrl(station.token);
+    const url = buildHourlyUrl(station.abbreviation);
     const content = await fetchText(url);
     const rows = parseCsv(content);
 

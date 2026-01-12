@@ -17,3 +17,21 @@ export async function fetchText(url: string): Promise<string> {
 
   return response.text();
 }
+
+/** Fetches binary content from a URL with typed error handling. */
+export async function fetchArrayBuffer(url: string): Promise<ArrayBuffer> {
+  let response: Response;
+  try {
+    response = await fetch(url);
+  } catch (error) {
+    throw new NetworkError(`Network request failed: ${url}`, { cause: error });
+  }
+
+  if (!response.ok) {
+    throw new NetworkError(
+      `HTTP ${response.status} ${response.statusText}: ${url}`
+    );
+  }
+
+  return response.arrayBuffer();
+}

@@ -18,7 +18,7 @@ import { fetchText } from "@/infrastructure/http-client";
 const mockedFetchText = vi.mocked(fetchText);
 
 describe("MeteoSwissWeatherRepository", () => {
-  const station = Station.create({ token: "goe", abbreviation: "GOE" });
+  const station = Station.create({ abbreviation: "GOE" });
   const testNow = new Date("2026-01-11T14:00:00Z");
 
   beforeEach(() => {
@@ -119,7 +119,7 @@ describe("MeteoSwissWeatherRepository", () => {
     expect(result.current).toBeNull();
   });
 
-  it("constructs correct URLs with station token", async () => {
+  it("constructs correct URLs with station abbreviation", async () => {
     mockedFetchText.mockImplementation(() =>
       Promise.resolve(VALID_CURRENT_CSV)
     );

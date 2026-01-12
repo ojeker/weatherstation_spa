@@ -97,6 +97,14 @@ export function formatPrecipitation(mm: number | null): string {
   return `${mm.toFixed(1)}mm`;
 }
 
+/** Formats distance in kilometers with variable precision. */
+export function formatDistanceKm(distanceKm: number): string {
+  if (distanceKm < 10) {
+    return `${distanceKm.toFixed(1)} km`;
+  }
+  return `${Math.round(distanceKm)} km`;
+}
+
 /** Formats temperature with degree symbol and one decimal place. */
 export function formatTemperature(celsius: number): string {
   return `${celsius.toFixed(1)}°C`;

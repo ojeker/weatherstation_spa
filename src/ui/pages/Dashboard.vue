@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, computed } from "vue";
-import type { Reading } from "@/domain";
+import { computed, ref } from "vue";
+import { Station, type Reading, type StationMeta } from "@/domain";
 import { useWeather } from "../composables";
 import {
   formatTemperature,
@@ -15,14 +15,13 @@ import HourlyChart from "../components/HourlyChart.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 import ErrorState from "../components/ErrorState.vue";
 import EmptyState from "../components/EmptyState.vue";
+import PlaceStationSelector from "../components/PlaceStationSelector.vue";
+import { stationProvider } from "../di";
 
 const SPARK_BAR_COUNT = 8;
 
-const { state, station, load, getErrorMessage } = useWeather();
-
-onMounted(() => {
-  load();
-});
+const { state, load, getErrorMessage } = useWeather();
+const selectedStation = ref<StationMeta | null>(null);
 
 const currentTimestamp = computed(() => {
   if (state.value.status !== "success" || !state.value.data.current) {
@@ -80,41 +79,63 @@ const isEmpty = computed(() => {
   if (state.value.status !== "success") return false;
   return !state.value.data.current && state.value.data.hourly.length === 0;
 });
+
+const stationName = computed(() => selectedStation.value?.name ?? "");
+
+function handleStationSelected(station: StationMeta) {
+  selectedStation.value = station;
+  stationProvider.setStation(
+    Station.create({ abbreviation: station.abbreviation })
+  );
+  load();
+}
+
+function handleChangeStation() {
+  selectedStation.value = null;
+}
 </script>
 
 <template>
   <main class="dashboard">
-    <LoadingSpinner v-if="state.status === 'loading'" />
-
-    <ErrorState
-      v-else-if="state.status === 'error'"
-      :message="getErrorMessage(state.error)"
-      @retry="load"
+    <PlaceStationSelector
+      v-if="!selectedStation"
+      @station-selected="handleStationSelected"
     />
 
-    <template v-else-if="state.status === 'success'">
-      <EmptyState v-if="isEmpty" :station-abbr="station.abbreviation" />
+    <template v-else>
+      <LoadingSpinner v-if="state.status === 'loading'" />
 
-      <template v-else>
-        <StationHeader
-          :station-abbr="station.abbreviation"
-          :timestamp="currentTimestamp"
-        />
+      <ErrorState
+        v-else-if="state.status === 'error'"
+        :message="getErrorMessage(state.error)"
+        @retry="load"
+      />
 
-        <div class="content">
-          <CurrentReading
-            :temperature="currentTemp"
-            :sunshine="currentSunshine"
-            :precipitation="currentPrecip"
-            :wind-speed-kmh="currentWindSpeed"
-            :wind-direction-deg="currentWindDirection"
+      <template v-else-if="state.status === 'success'">
+        <EmptyState v-if="isEmpty" :station-name="stationName" />
+
+        <template v-else>
+          <StationHeader
+            :station-name="stationName"
+            :timestamp="currentTimestamp"
+            @change="handleChangeStation"
           />
 
-          <HourlyChart
-            v-if="hourlyReadings.length > 0"
-            :readings="hourlyReadings"
-          />
-        </div>
+          <div class="content">
+            <CurrentReading
+              :temperature="currentTemp"
+              :sunshine="currentSunshine"
+              :precipitation="currentPrecip"
+              :wind-speed-kmh="currentWindSpeed"
+              :wind-direction-deg="currentWindDirection"
+            />
+
+            <HourlyChart
+              v-if="hourlyReadings.length > 0"
+              :readings="hourlyReadings"
+            />
+          </div>
+        </template>
       </template>
     </template>
   </main>
