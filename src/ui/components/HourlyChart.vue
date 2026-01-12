@@ -47,6 +47,9 @@ const chartData = computed(() => {
 
   const temperatures = readings.map((r) => r.temperatureC);
 
+  // Wind speed in km/h
+  const windSpeeds = readings.map((r) => r.windSpeedKmh ?? 0);
+
   // Sunshine as percentage (positive)
   const maxSunMinutes = readings[0]?.kind === "hourly" ? 60 : 10;
   const sunshinePercent = readings.map((r) =>
@@ -66,6 +69,7 @@ const chartData = computed(() => {
   return {
     labels,
     temperatures,
+    windSpeeds,
     sunshinePercent,
     precipNegative,
     maxSun,
@@ -89,6 +93,10 @@ function createChart() {
   const tempMin = Math.min(...data.temperatures) - 2;
   const tempMax = Math.max(...data.temperatures) + 2;
 
+  // Wind speed range for left axis
+  const windMin = 0;
+  const windMax = Math.max(...data.windSpeeds, 20) * 1.1;
+
   chartInstance = new Chart(ctx, {
     type: "bar",
     data: {
@@ -105,6 +113,22 @@ function createChart() {
           pointBackgroundColor: "#e74c3c",
           tension: 0.3,
           yAxisID: "yTemp",
+          datalabels: {
+            display: false,
+          },
+          order: 0,
+        },
+        {
+          type: "line",
+          label: "Wind",
+          data: data.windSpeeds,
+          borderColor: "#22c55e",
+          backgroundColor: "rgba(34, 197, 94, 0.1)",
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: "#22c55e",
+          tension: 0.3,
+          yAxisID: "yWind",
           datalabels: {
             display: false,
           },
@@ -171,6 +195,7 @@ function createChart() {
               const label = context.dataset.label || "";
               const value = context.raw as number;
               if (label === "Temperature") return `${label}: ${value.toFixed(1)}°C`;
+              if (label === "Wind") return `${label}: ${Math.round(value)} km/h`;
               if (label === "Sunshine") return `${label}: ${Math.round(value)}%`;
               if (label === "Precipitation") return `${label}: ${Math.abs(value).toFixed(1)}mm`;
               return `${label}: ${value}`;
@@ -212,6 +237,20 @@ function createChart() {
             callback: (value) => `${value}°`,
             font: { size: 10 },
             color: "#e74c3c",
+          },
+        },
+        yWind: {
+          type: "linear",
+          position: "left",
+          min: windMin,
+          max: windMax,
+          grid: {
+            display: false,
+          },
+          ticks: {
+            callback: (value) => `${value}`,
+            font: { size: 10 },
+            color: "#22c55e",
           },
         },
       },
