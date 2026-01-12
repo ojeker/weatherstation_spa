@@ -55,6 +55,9 @@ describe("mapCurrentReading", () => {
       tre200s0: "12.3",
       sre000z0: "8",
       rre150z0: "0.5",
+      fkl010z0: "5.0",
+      dkl010z0: "180",
+      pp0qnhs0: "1013.25",
     };
 
     const reading = mapCurrentReading(row);
@@ -62,6 +65,9 @@ describe("mapCurrentReading", () => {
     expect(reading.temperatureC).toBe(12.3);
     expect(reading.sunshineMinutes).toBe(8);
     expect(reading.precipitationMm).toBe(0.5);
+    expect(reading.windSpeedKmh).toBe(18); // 5 m/s * 3.6
+    expect(reading.windDirectionDeg).toBe(180);
+    expect(reading.pressureHpa).toBe(1013.25);
     expect(reading.kind).toBe("ten-minute");
   });
 
@@ -71,6 +77,9 @@ describe("mapCurrentReading", () => {
       tre200s0: "12.3",
       sre000z0: "",
       rre150z0: "",
+      fkl010z0: "",
+      dkl010z0: "",
+      pp0qnhs0: "",
     };
 
     const reading = mapCurrentReading(row);
@@ -78,6 +87,9 @@ describe("mapCurrentReading", () => {
     expect(reading.temperatureC).toBe(12.3);
     expect(reading.sunshineMinutes).toBeNull();
     expect(reading.precipitationMm).toBeNull();
+    expect(reading.windSpeedKmh).toBeNull();
+    expect(reading.windDirectionDeg).toBeNull();
+    expect(reading.pressureHpa).toBeNull();
   });
 
   it("throws when temperature is missing", () => {
@@ -86,6 +98,9 @@ describe("mapCurrentReading", () => {
       tre200s0: "",
       sre000z0: "8",
       rre150z0: "0.5",
+      fkl010z0: "",
+      dkl010z0: "",
+      pp0qnhs0: "",
     };
 
     expect(() => mapCurrentReading(row)).toThrow(InvalidValueError);
@@ -99,6 +114,9 @@ describe("mapHourlyReading", () => {
       tre200h0: "11.5",
       sre000h0: "45",
       rre150h0: "1.2",
+      fkl010h0: "3.0",
+      dkl010h0: "270",
+      pp0qnhh0: "1015.0",
     };
 
     const reading = mapHourlyReading(row);
@@ -106,6 +124,9 @@ describe("mapHourlyReading", () => {
     expect(reading.temperatureC).toBe(11.5);
     expect(reading.sunshineMinutes).toBe(45);
     expect(reading.precipitationMm).toBe(1.2);
+    expect(reading.windSpeedKmh).toBeCloseTo(10.8); // 3 m/s * 3.6
+    expect(reading.windDirectionDeg).toBe(270);
+    expect(reading.pressureHpa).toBe(1015.0);
     expect(reading.kind).toBe("hourly");
   });
 
@@ -115,11 +136,17 @@ describe("mapHourlyReading", () => {
       tre200h0: "11.5",
       sre000h0: "",
       rre150h0: "",
+      fkl010h0: "",
+      dkl010h0: "",
+      pp0qnhh0: "",
     };
 
     const reading = mapHourlyReading(row);
 
     expect(reading.sunshineMinutes).toBeNull();
     expect(reading.precipitationMm).toBeNull();
+    expect(reading.windSpeedKmh).toBeNull();
+    expect(reading.windDirectionDeg).toBeNull();
+    expect(reading.pressureHpa).toBeNull();
   });
 });

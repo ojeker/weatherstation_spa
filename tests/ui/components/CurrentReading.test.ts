@@ -3,13 +3,17 @@ import { mount } from "@vue/test-utils";
 import CurrentReading from "@/ui/components/CurrentReading.vue";
 
 describe("CurrentReading", () => {
+  const baseProps = {
+    temperature: "12°C",
+    sunshine: "80%",
+    precipitation: "0mm",
+    windSpeedKmh: null,
+    windDirectionDeg: null,
+  };
+
   it("displays temperature", () => {
     const wrapper = mount(CurrentReading, {
-      props: {
-        temperature: "12°C",
-        sunshine: "80%",
-        precipitation: "0mm",
-      },
+      props: baseProps,
     });
 
     expect(wrapper.text()).toContain("12°C");
@@ -17,11 +21,7 @@ describe("CurrentReading", () => {
 
   it("displays sunshine percentage", () => {
     const wrapper = mount(CurrentReading, {
-      props: {
-        temperature: "12°C",
-        sunshine: "80%",
-        precipitation: "0mm",
-      },
+      props: baseProps,
     });
 
     expect(wrapper.text()).toContain("80%");
@@ -30,8 +30,7 @@ describe("CurrentReading", () => {
   it("displays precipitation", () => {
     const wrapper = mount(CurrentReading, {
       props: {
-        temperature: "12°C",
-        sunshine: "80%",
+        ...baseProps,
         precipitation: "2.5mm",
       },
     });
@@ -45,6 +44,8 @@ describe("CurrentReading", () => {
         temperature: "—",
         sunshine: "—",
         precipitation: "—",
+        windSpeedKmh: null,
+        windDirectionDeg: null,
       },
     });
 
@@ -54,14 +55,31 @@ describe("CurrentReading", () => {
 
   it("displays weather icons", () => {
     const wrapper = mount(CurrentReading, {
-      props: {
-        temperature: "12°C",
-        sunshine: "80%",
-        precipitation: "0mm",
-      },
+      props: baseProps,
     });
 
     expect(wrapper.text()).toContain("☀");
     expect(wrapper.text()).toContain("💧");
+  });
+
+  it("displays wind indicator when wind data is available", () => {
+    const wrapper = mount(CurrentReading, {
+      props: {
+        ...baseProps,
+        windSpeedKmh: 25,
+        windDirectionDeg: 180,
+      },
+    });
+
+    expect(wrapper.find(".wind-indicator").exists()).toBe(true);
+    expect(wrapper.text()).toContain("25 km/h");
+  });
+
+  it("hides wind indicator when wind data is null", () => {
+    const wrapper = mount(CurrentReading, {
+      props: baseProps,
+    });
+
+    expect(wrapper.find(".wind-indicator").exists()).toBe(false);
   });
 });

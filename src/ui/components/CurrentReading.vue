@@ -1,23 +1,40 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from "vue";
+import WindArrow from "./WindArrow.vue";
+
+const props = defineProps<{
   temperature: string;
   sunshine: string;
   precipitation: string;
+  windSpeedKmh: number | null;
+  windDirectionDeg: number | null;
 }>();
+
+const hasWindData = computed(
+  () => props.windSpeedKmh !== null && props.windDirectionDeg !== null
+);
 </script>
 
 <template>
   <section class="current-reading">
     <div class="temperature">{{ temperature }}</div>
-    <div class="details">
-      <span class="detail">
-        <span class="icon icon-sun">☀</span>
-        <span class="value">{{ sunshine }}</span>
-      </span>
-      <span class="detail">
-        <span class="icon icon-rain">💧</span>
-        <span class="value">{{ precipitation }}</span>
-      </span>
+    <div class="details-row">
+      <!-- Left side: sunshine and precipitation stacked vertically -->
+      <div class="weather-details">
+        <span class="detail">
+          <span class="icon icon-sun">☀</span>
+          <span class="value">{{ sunshine }}</span>
+        </span>
+        <span class="detail">
+          <span class="icon icon-rain">💧</span>
+          <span class="value">{{ precipitation }}</span>
+        </span>
+      </div>
+
+      <!-- Right side: wind indicator -->
+      <div v-if="hasWindData" class="wind-indicator">
+        <WindArrow :direction-deg="windDirectionDeg!" :speed-kmh="windSpeedKmh!" />
+      </div>
     </div>
   </section>
 </template>
@@ -37,10 +54,18 @@ defineProps<{
   color: #222;
 }
 
-.details {
+.details-row {
   display: flex;
-  gap: 1.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
   margin-top: 0.75rem;
+}
+
+.weather-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
   font-size: 1.1rem;
   color: #555;
 }
@@ -61,5 +86,13 @@ defineProps<{
 
 .value {
   font-variant-numeric: tabular-nums;
+}
+
+.wind-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 1.5rem;
+  border-left: 1px solid #eee;
 }
 </style>

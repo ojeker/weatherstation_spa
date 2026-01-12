@@ -104,8 +104,8 @@ describe("MeteoSwissWeatherRepository", () => {
   });
 
   it("returns null current when no readings for today", async () => {
-    const oldDataCsv = `reference_timestamp;station_abbr;tre200s0;sre000z0;rre150z0
-01.01.2026 13:20;GOE;12.3;8;0.5`;
+    const oldDataCsv = `reference_timestamp;station_abbr;tre200s0;sre000z0;rre150z0;fkl010z0;dkl010z0;pp0qnhs0
+01.01.2026 13:20;GOE;12.3;8;0.5;5.0;180;1013.25`;
 
     mockedFetchText.mockImplementation((url: string) => {
       if (url.includes("_t_now")) return Promise.resolve(oldDataCsv);

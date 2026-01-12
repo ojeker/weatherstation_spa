@@ -14,6 +14,9 @@ describe("validateRequiredColumns", () => {
         tre200s0: "12.3",
         sre000z0: "8",
         rre150z0: "0.5",
+        fkl010z0: "5.0",
+        dkl010z0: "180",
+        pp0qnhs0: "1013.25",
       },
     ];
 

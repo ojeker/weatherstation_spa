@@ -97,9 +97,34 @@ export function formatPrecipitation(mm: number | null): string {
   return `${mm.toFixed(1)}mm`;
 }
 
-/** Formats temperature with degree symbol. */
+/** Formats temperature with degree symbol and one decimal place. */
 export function formatTemperature(celsius: number): string {
-  return `${Math.round(celsius)}°C`;
+  return `${celsius.toFixed(1)}°C`;
+}
+
+/** Formats wind speed in km/h. */
+export function formatWindSpeed(kmh: number | null): string {
+  if (kmh === null) return "—";
+  return `${Math.round(kmh)} km/h`;
+}
+
+/** Converts wind direction degrees to cardinal direction. */
+export function degreesToCardinal(degrees: number): string {
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
+  const index = Math.round(degrees / 45) % 8;
+  return directions[index];
+}
+
+/** Formats wind direction as cardinal direction with degrees. */
+export function formatWindDirection(degrees: number | null): string {
+  if (degrees === null) return "—";
+  return `${degreesToCardinal(degrees)} (${Math.round(degrees)}°)`;
+}
+
+/** Formats pressure in hPa. */
+export function formatPressure(hpa: number | null): string {
+  if (hpa === null) return "—";
+  return `${Math.round(hpa)} hPa`;
 }
 
 /** Formats a timestamp as HH:mm. */
@@ -119,4 +144,12 @@ export function getHourLabels(readings: readonly Reading[]): string[] {
       timeZone: "Europe/Zurich",
     })
   );
+}
+
+/** Gets color based on wind speed thresholds. */
+export function getWindSpeedColor(speedKmh: number): string {
+  if (speedKmh < 30) return "#22c55e"; // green
+  if (speedKmh < 50) return "#eab308"; // yellow
+  if (speedKmh < 70) return "#f97316"; // orange
+  return "#ef4444"; // red
 }

@@ -55,6 +55,20 @@ const currentPrecip = computed(() => {
   return formatPrecipitation(state.value.data.current.precipitationMm);
 });
 
+const currentWindSpeed = computed(() => {
+  if (state.value.status !== "success" || !state.value.data.current) {
+    return null;
+  }
+  return state.value.data.current.windSpeedKmh;
+});
+
+const currentWindDirection = computed(() => {
+  if (state.value.status !== "success" || !state.value.data.current) {
+    return null;
+  }
+  return state.value.data.current.windDirectionDeg;
+});
+
 const hourlyReadings = computed(() => {
   if (state.value.status !== "success") {
     return [] as Reading[];
@@ -92,6 +106,8 @@ const isEmpty = computed(() => {
             :temperature="currentTemp"
             :sunshine="currentSunshine"
             :precipitation="currentPrecip"
+            :wind-speed-kmh="currentWindSpeed"
+            :wind-direction-deg="currentWindDirection"
           />
 
           <HourlyChart

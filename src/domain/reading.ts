@@ -8,18 +8,26 @@ export const TEMPERATURE_RANGE_C = {
   max: 60,
 } as const;
 
+export const WIND_DIRECTION_RANGE_DEG = {
+  min: 0,
+  max: 360,
+} as const;
+
 const MAX_SUNSHINE_MINUTES: Record<ReadingKind, number> = {
   "ten-minute": 10,
   hourly: 60,
 };
 
-/** A single weather measurement with temperature, sunshine, and precipitation data. */
+/** A single weather measurement with temperature, sunshine, precipitation, wind, and pressure data. */
 export class Reading {
   private constructor(
     readonly timestamp: Timestamp,
     readonly temperatureC: number,
     readonly sunshineMinutes: number | null,
     readonly precipitationMm: number | null,
+    readonly windSpeedKmh: number | null,
+    readonly windDirectionDeg: number | null,
+    readonly pressureHpa: number | null,
     readonly kind: ReadingKind,
   ) {}
 
@@ -28,6 +36,9 @@ export class Reading {
     temperatureC: number;
     sunshineMinutes: number | null;
     precipitationMm: number | null;
+    windSpeedKmh: number | null;
+    windDirectionDeg: number | null;
+    pressureHpa: number | null;
     kind: ReadingKind;
   }): Reading {
     if (!(params.timestamp instanceof Timestamp)) {
@@ -71,11 +82,49 @@ export class Reading {
       }
     }
 
+    const windSpeedKmh = params.windSpeedKmh;
+    if (windSpeedKmh !== null) {
+      if (!Number.isFinite(windSpeedKmh) || windSpeedKmh < 0) {
+        throw new InvalidValueError(
+          "Wind speed must be a non-negative number or null.",
+        );
+      }
+    }
+
+    const windDirectionDeg = params.windDirectionDeg;
+    if (windDirectionDeg !== null) {
+      if (!Number.isFinite(windDirectionDeg)) {
+        throw new InvalidValueError(
+          "Wind direction must be a finite number or null.",
+        );
+      }
+      if (
+        windDirectionDeg < WIND_DIRECTION_RANGE_DEG.min ||
+        windDirectionDeg > WIND_DIRECTION_RANGE_DEG.max
+      ) {
+        throw new InvalidValueError(
+          `Wind direction must be between ${WIND_DIRECTION_RANGE_DEG.min} and ${WIND_DIRECTION_RANGE_DEG.max} degrees.`,
+        );
+      }
+    }
+
+    const pressureHpa = params.pressureHpa;
+    if (pressureHpa !== null) {
+      if (!Number.isFinite(pressureHpa) || pressureHpa <= 0) {
+        throw new InvalidValueError(
+          "Pressure must be a positive number or null.",
+        );
+      }
+    }
+
     return new Reading(
       params.timestamp,
       params.temperatureC,
       sunshineMinutes,
       precipitationMm,
+      windSpeedKmh,
+      windDirectionDeg,
+      pressureHpa,
       params.kind,
     );
   }
