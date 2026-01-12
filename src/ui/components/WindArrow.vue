@@ -22,12 +22,12 @@ const speedLabel = computed(() => formatWindSpeed(props.speedKmh));
       class="arrow-svg"
       :style="rotationStyle"
       viewBox="0 0 48 48"
-      width="48"
-      height="48"
+      width="96"
+      height="96"
       aria-label="Wind direction arrow"
     >
-      <!-- Compass circle -->
-      <circle cx="24" cy="24" r="22" fill="none" stroke="#e5e7eb" stroke-width="1" />
+      <!-- Compass circle with black border -->
+      <circle cx="24" cy="24" r="22" fill="none" stroke="#000" stroke-width="1.5" />
       <!-- Cardinal direction markers -->
       <line x1="24" y1="4" x2="24" y2="8" stroke="#ccc" stroke-width="1" />
       <line x1="44" y1="24" x2="40" y2="24" stroke="#ccc" stroke-width="1" />

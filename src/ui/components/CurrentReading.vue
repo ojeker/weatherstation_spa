@@ -19,7 +19,12 @@ const hasWindData = computed(
   <section class="current-reading">
     <div class="temperature">{{ temperature }}</div>
     <div class="details-row">
-      <!-- Left side: sunshine and precipitation stacked vertically -->
+      <!-- Left side: wind indicator -->
+      <div v-if="hasWindData" class="wind-indicator">
+        <WindArrow :direction-deg="windDirectionDeg!" :speed-kmh="windSpeedKmh!" />
+      </div>
+
+      <!-- Right side: sunshine and precipitation stacked vertically -->
       <div class="weather-details">
         <span class="detail">
           <span class="icon icon-sun">☀</span>
@@ -29,11 +34,6 @@ const hasWindData = computed(
           <span class="icon icon-rain">💧</span>
           <span class="value">{{ precipitation }}</span>
         </span>
-      </div>
-
-      <!-- Right side: wind indicator -->
-      <div v-if="hasWindData" class="wind-indicator">
-        <WindArrow :direction-deg="windDirectionDeg!" :speed-kmh="windSpeedKmh!" />
       </div>
     </div>
   </section>
@@ -92,7 +92,7 @@ const hasWindData = computed(
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-left: 1.5rem;
-  border-left: 1px solid #eee;
+  padding-right: 1.5rem;
+  border-right: 1px solid #eee;
 }
 </style>
