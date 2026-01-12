@@ -38,15 +38,16 @@ describe("Weather Dashboard", () => {
       cy.contains("💧").should("be.visible");
     });
 
-    it("displays spark bars for hourly data", () => {
+    it("displays chart with hourly data", () => {
       cy.visit("/");
 
       cy.wait(["@getCurrentData", "@getHourlyData"]);
 
-      // Check for spark row labels
-      cy.contains("Temp").should("be.visible");
-      cy.contains("Sun").should("be.visible");
-      cy.contains("Rain").should("be.visible");
+      // Check for chart canvas and legend hints
+      cy.get("canvas").should("be.visible");
+      cy.get(".legend-hint").should("be.visible");
+      cy.get(".legend-hint").contains("%").should("be.visible");
+      cy.get(".legend-hint").contains("mm").should("be.visible");
     });
   });
 
