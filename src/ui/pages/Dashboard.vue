@@ -22,6 +22,13 @@ const SPARK_BAR_COUNT = 8;
 
 const { state, load, getErrorMessage } = useWeather();
 const selectedStation = ref<StationMeta | null>(null);
+const isRefreshing = ref(false);
+
+async function handleRefresh() {
+  isRefreshing.value = true;
+  await load();
+  isRefreshing.value = false;
+}
 
 const currentTimestamp = computed(() => {
   if (state.value.status !== "success" || !state.value.data.current) {
@@ -103,7 +110,7 @@ function handleChangeStation() {
     />
 
     <template v-else>
-      <LoadingSpinner v-if="state.status === 'loading'" />
+      <LoadingSpinner v-if="state.status === 'loading' && !isRefreshing" />
 
       <ErrorState
         v-else-if="state.status === 'error'"
@@ -111,14 +118,16 @@ function handleChangeStation() {
         @retry="load"
       />
 
-      <template v-else-if="state.status === 'success'">
+      <template v-else-if="state.status === 'success' || isRefreshing">
         <EmptyState v-if="isEmpty" :station-name="stationName" />
 
         <template v-else>
           <StationHeader
             :station-name="stationName"
             :timestamp="currentTimestamp"
+            :loading="isRefreshing"
             @change="handleChangeStation"
+            @refresh="handleRefresh"
           />
 
           <div class="content">
