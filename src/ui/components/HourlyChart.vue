@@ -14,6 +14,22 @@ import {
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Reading } from "@/domain";
+import nIcon from "@/ui/assets/wind-directions/n.svg";
+import nneIcon from "@/ui/assets/wind-directions/nne.svg";
+import neIcon from "@/ui/assets/wind-directions/ne.svg";
+import eneIcon from "@/ui/assets/wind-directions/ene.svg";
+import eIcon from "@/ui/assets/wind-directions/e.svg";
+import eseIcon from "@/ui/assets/wind-directions/ese.svg";
+import seIcon from "@/ui/assets/wind-directions/se.svg";
+import sseIcon from "@/ui/assets/wind-directions/sse.svg";
+import sIcon from "@/ui/assets/wind-directions/s.svg";
+import sswIcon from "@/ui/assets/wind-directions/ssw.svg";
+import swIcon from "@/ui/assets/wind-directions/sw.svg";
+import wswIcon from "@/ui/assets/wind-directions/wsw.svg";
+import wIcon from "@/ui/assets/wind-directions/w.svg";
+import wnwIcon from "@/ui/assets/wind-directions/wnw.svg";
+import nwIcon from "@/ui/assets/wind-directions/nw.svg";
+import nnwIcon from "@/ui/assets/wind-directions/nnw.svg";
 
 Chart.register(
   CategoryScale,
@@ -35,6 +51,47 @@ const props = defineProps<{
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
 
+const WIND_ICONS = [
+  { key: "n", label: "N", url: nIcon },
+  { key: "nne", label: "NNE", url: nneIcon },
+  { key: "ne", label: "NE", url: neIcon },
+  { key: "ene", label: "ENE", url: eneIcon },
+  { key: "e", label: "E", url: eIcon },
+  { key: "ese", label: "ESE", url: eseIcon },
+  { key: "se", label: "SE", url: seIcon },
+  { key: "sse", label: "SSE", url: sseIcon },
+  { key: "s", label: "S", url: sIcon },
+  { key: "ssw", label: "SSW", url: sswIcon },
+  { key: "sw", label: "SW", url: swIcon },
+  { key: "wsw", label: "WSW", url: wswIcon },
+  { key: "w", label: "W", url: wIcon },
+  { key: "wnw", label: "WNW", url: wnwIcon },
+  { key: "nw", label: "NW", url: nwIcon },
+  { key: "nnw", label: "NNW", url: nnwIcon },
+] as const;
+
+const windIconCache = new Map<string, HTMLImageElement>();
+
+function getWindIcon(directionDeg: number | null): HTMLImageElement | null {
+  if (directionDeg === null) return null;
+  const normalized = ((directionDeg % 360) + 360) % 360;
+  const index = Math.round(normalized / 22.5) % WIND_ICONS.length;
+  const entry = WIND_ICONS[index];
+  const cached = windIconCache.get(entry.key);
+  if (cached) return cached;
+  const image = new Image();
+  image.src = entry.url;
+  windIconCache.set(entry.key, image);
+  return image;
+}
+
+function getWindLabel(directionDeg: number | null): string | null {
+  if (directionDeg === null) return null;
+  const normalized = ((directionDeg % 360) + 360) % 360;
+  const index = Math.round(normalized / 22.5) % WIND_ICONS.length;
+  return WIND_ICONS[index].label;
+}
+
 const windGridStyle = computed(() => ({
   gridTemplateColumns: `repeat(${props.readings.length}, minmax(0, 1fr))`,
 }));
@@ -53,6 +110,7 @@ const chartData = computed(() => {
 
   // Wind speed in km/h
   const windSpeeds = readings.map((r) => r.windSpeedKmh ?? 0);
+  const windDirections = readings.map((r) => r.windDirectionDeg ?? null);
 
   // Sunshine as percentage (positive)
   const maxSunMinutes = readings[0]?.kind === "hourly" ? 60 : 10;
@@ -60,25 +118,24 @@ const chartData = computed(() => {
     r.sunshineMinutes !== null ? (r.sunshineMinutes / maxSunMinutes) * 100 : 0
   );
 
-  // Precipitation as negative values
-  const precipNegative = readings.map((r) =>
-    r.precipitationMm !== null ? -r.precipitationMm : 0
+  // Precipitation as positive values
+  const precipValues = readings.map((r) =>
+    r.precipitationMm !== null ? r.precipitationMm : 0
   );
 
   // Calculate axis bounds
   const maxSun = Math.max(...sunshinePercent, 100);
-  const minPrecip = Math.min(...precipNegative, 0);
-  const maxPrecipAbs = Math.abs(minPrecip);
+  const maxPrecip = Math.max(...precipValues, 0);
 
   return {
     labels,
     temperatures,
     windSpeeds,
+    windDirections,
     sunshinePercent,
-    precipNegative,
+    precipValues,
     maxSun,
-    minPrecip,
-    maxPrecipAbs,
+    maxPrecip,
   };
 });
 
@@ -91,7 +148,7 @@ function createChart() {
 
   // Calculate y-axis range to accommodate both sunshine and precip
   const yMax = Math.max(data.maxSun, 100);
-  const yMin = data.minPrecip < 0 ? Math.min(data.minPrecip * 1.2, -10) : -10;
+  const yMin = 0;
 
   // Temperature range for secondary axis
   const numericTemps = data.temperatures.filter(
@@ -132,8 +189,16 @@ function createChart() {
           borderColor: "#22c55e",
           backgroundColor: "rgba(34, 197, 94, 0.1)",
           borderWidth: 2,
-          pointRadius: 3,
-          pointBackgroundColor: "#22c55e",
+          pointRadius: (context) =>
+            data.windDirections[context.dataIndex] === null ? 0 : 8,
+          pointHoverRadius: 10,
+          pointStyle: (context) => {
+            const direction = data.windDirections[context.dataIndex];
+            return getWindIcon(direction) ?? "circle";
+          },
+          pointBackgroundColor: "#000",
+          pointBorderColor: "#000",
+          showLine: true,
           tension: 0.3,
           yAxisID: "yWind",
           datalabels: {
@@ -161,7 +226,7 @@ function createChart() {
         {
           type: "bar",
           label: "Precipitation",
-          data: data.precipNegative,
+          data: data.precipValues,
           backgroundColor: "rgba(52, 152, 219, 0.7)",
           borderColor: "#3498db",
           borderWidth: 1,
@@ -170,7 +235,7 @@ function createChart() {
             anchor: "end",
             align: "end",
             formatter: (value: number) =>
-              value < 0 ? `${Math.abs(value).toFixed(1)}` : "",
+              value > 0 ? `${value.toFixed(1)}` : "",
             color: "#1a5276",
             font: { size: 10, weight: "bold" },
           },
@@ -203,9 +268,13 @@ function createChart() {
               const value = context.raw as number | null;
               if (value === null) return `${label}: —`;
               if (label === "Temperature") return `${label}: ${value.toFixed(1)}°C`;
-              if (label === "Wind") return `${label}: ${Math.round(value)} km/h`;
+              if (label === "Wind") {
+                const direction = data.windDirections[context.dataIndex];
+                const directionLabel = getWindLabel(direction);
+                return `${label}: ${Math.round(value)} km/h${directionLabel ? ` · ${directionLabel}` : ""}`;
+              }
               if (label === "Sunshine") return `${label}: ${Math.round(value)}%`;
-              if (label === "Precipitation") return `${label}: ${Math.abs(value).toFixed(1)}mm`;
+              if (label === "Precipitation") return `${label}: ${value.toFixed(1)}mm`;
               return `${label}: ${value}`;
             },
           },
