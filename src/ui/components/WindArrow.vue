@@ -21,8 +21,8 @@ const speedLabel = computed(() => formatWindSpeed(props.speedKmh));
     <svg
       class="arrow-svg"
       viewBox="0 0 48 48"
-      width="67"
-      height="67"
+      width="47"
+      height="47"
       aria-label="Wind direction arrow"
     >
       <!-- Compass circle (fixed, does not rotate) -->
@@ -59,7 +59,7 @@ const speedLabel = computed(() => formatWindSpeed(props.speedKmh));
 }
 
 .wind-speed {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: #555;
   font-variant-numeric: tabular-nums;
 }

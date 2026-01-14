@@ -10,10 +10,12 @@ import {
   BarController,
   LineController,
   Tooltip,
+  Title,
   Legend,
 } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import type { Reading } from "@/domain";
+import type { ChartDataset } from "chart.js";
 import nIcon from "@/ui/assets/wind-directions/n.svg";
 import nneIcon from "@/ui/assets/wind-directions/nne.svg";
 import neIcon from "@/ui/assets/wind-directions/ne.svg";
@@ -30,19 +32,6 @@ import wIcon from "@/ui/assets/wind-directions/w.svg";
 import wnwIcon from "@/ui/assets/wind-directions/wnw.svg";
 import nwIcon from "@/ui/assets/wind-directions/nw.svg";
 import nnwIcon from "@/ui/assets/wind-directions/nnw.svg";
-
-Chart.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  LineElement,
-  PointElement,
-  BarController,
-  LineController,
-  Tooltip,
-  Legend,
-  ChartDataLabels
-);
 
 const props = defineProps<{
   readings: Reading[];
@@ -73,6 +62,70 @@ const WIND_ICONS = [
 ] as const;
 
 const windIconCache = new Map<string, HTMLImageElement>();
+
+const PRECIP_DATASET_LABEL = "Precipitation";
+
+type PrecipDataset = ChartDataset<"bar", number[]> & {
+  rawValues?: number[];
+};
+
+const precipZigzagPlugin = {
+  id: "precipZigzag",
+  afterDatasetsDraw(chart: Chart) {
+    const datasetIndex = chart.data.datasets.findIndex(
+      (dataset) => dataset.label === PRECIP_DATASET_LABEL
+    );
+    if (datasetIndex === -1) return;
+
+    const meta = chart.getDatasetMeta(datasetIndex);
+    const dataset = chart.data.datasets[datasetIndex] as PrecipDataset;
+    const rawValues = dataset.rawValues ?? [];
+
+    meta.data.forEach((element, index) => {
+      const rawValue = rawValues[index] ?? 0;
+      if (rawValue <= PRECIP_CAP_MM) return;
+
+      const bar = element as unknown as { x: number; y: number; width?: number };
+      const width = Math.max(6, (bar.width ?? 10) - 4);
+      const startX = bar.x - width / 2;
+      const endX = bar.x + width / 2;
+      const y = bar.y + 1;
+
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.strokeStyle = "#0b2a3d";
+      ctx.lineWidth = 1.5;
+      ctx.lineJoin = "round";
+      ctx.beginPath();
+
+      const segments = 5;
+      const step = (endX - startX) / segments;
+      for (let i = 0; i <= segments; i++) {
+        const x = startX + i * step;
+        const offset = i % 2 === 0 ? -3 : 3;
+        if (i === 0) ctx.moveTo(x, y + offset);
+        else ctx.lineTo(x, y + offset);
+      }
+      ctx.stroke();
+      ctx.restore();
+    });
+  },
+};
+
+Chart.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  LineElement,
+  PointElement,
+  BarController,
+  LineController,
+  Tooltip,
+  Title,
+  Legend,
+  ChartDataLabels,
+  precipZigzagPlugin
+);
 
 function getWindIcon(directionDeg: number | null): HTMLImageElement | null {
   if (directionDeg === null) return null;
@@ -202,10 +255,10 @@ function createChart() {
           borderColor: "#22c55e",
           backgroundColor: "rgba(34, 197, 94, 0.1)",
           borderWidth: 2,
-          pointRadius: (context) =>
+          pointRadius: (context: { dataIndex: number }) =>
             data.windDirections[context.dataIndex] === null ? 0 : 8,
           pointHoverRadius: 10,
-          pointStyle: (context) => {
+          pointStyle: (context: { dataIndex: number }) => {
             const direction = data.windDirections[context.dataIndex];
             return getWindIcon(direction) ?? "circle";
           },
@@ -244,34 +297,38 @@ function createChart() {
           },
           order: 1,
         },
-        {
-          type: "bar",
-          label: "Precipitation",
-          data: data.precipValuesScaled,
-          backgroundColor: "rgba(52, 152, 219, 0.7)",
-          borderColor: "#3498db",
-          borderWidth: 1,
-          yAxisID: "yBars",
-          datalabels: {
-            anchor: "end",
-            align: (context) => {
-              const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
-              return rawValue > PRECIP_CAP_MM * 0.6 ? "start" : "end";
+        (() => {
+          const dataset: PrecipDataset = {
+            type: "bar",
+            label: "Precipitation",
+            rawValues: data.precipValuesRaw,
+            data: data.precipValuesScaled,
+            backgroundColor: "rgba(52, 152, 219, 0.7)",
+            borderColor: "#3498db",
+            borderWidth: 1,
+            yAxisID: "yBars",
+            datalabels: {
+              anchor: "end",
+              align: (context: { dataIndex: number }) => {
+                const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
+                return rawValue > PRECIP_CAP_MM * 0.6 ? "start" : "end";
+              },
+              formatter: (_value: number, context: { dataIndex: number }) => {
+                const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
+                if (rawValue <= 0) return "";
+                const suffix = rawValue > PRECIP_CAP_MM ? "!" : "";
+                return `${rawValue.toFixed(1)}${suffix}`;
+              },
+              color: (context: { dataIndex: number }) => {
+                const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
+                return rawValue > PRECIP_CAP_MM * 0.6 ? "#0b2a3d" : "#1a5276";
+              },
+              font: { size: 10, weight: "bold" },
             },
-            formatter: (_value: number, context) => {
-              const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
-              if (rawValue <= 0) return "";
-              const suffix = rawValue > PRECIP_CAP_MM ? "!" : "";
-              return `${rawValue.toFixed(1)}${suffix}`;
-            },
-            color: (context) => {
-              const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
-              return rawValue > PRECIP_CAP_MM * 0.6 ? "#0b2a3d" : "#1a5276";
-            },
-            font: { size: 10, weight: "bold" },
-          },
-          order: 2,
-        },
+            order: 2,
+          };
+          return dataset;
+        })(),
       ],
     },
     options: {
@@ -288,13 +345,19 @@ function createChart() {
       },
       plugins: {
         legend: {
+          display: false,
+        },
+        title: {
           display: true,
-          position: "top",
-          labels: {
-            usePointStyle: true,
-            boxWidth: 8,
-            padding: 12,
-            font: { size: 11 },
+          text: "Hourly values",
+          font: {
+            size: 18,
+            weight: 400,
+          },
+          color: "#555",
+          padding: {
+            top: 4,
+            bottom: 12,
           },
         },
         tooltip: {
@@ -437,10 +500,6 @@ watch(() => props.readings, updateChart, { deep: true });
       <span class="hint"><span class="icon-sun">☀</span> %</span>
       <span class="hint"><span class="icon-precip">💧</span> mm</span>
     </div>
-    <p class="legend-note">
-      Precipitation bars are scaled so {{ PRECIP_CAP_MM }}mm is full height;
-      labels show actual values (! indicates capped).
-    </p>
   </section>
 </template>
 
@@ -467,13 +526,6 @@ watch(() => props.readings, updateChart, { deep: true });
   margin-top: 0.5rem;
   font-size: 0.75rem;
   color: #888;
-}
-
-.legend-note {
-  margin-top: 0.35rem;
-  text-align: center;
-  font-size: 0.7rem;
-  color: #94a3b8;
 }
 
 .icon-sun {
