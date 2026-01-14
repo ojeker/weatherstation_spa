@@ -8,9 +8,10 @@
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test:unit": "vitest run",
-    "test:e2e": "npm run build && start-server-and-test 'npm run preview -- --port 5173' http://localhost:5173 'cypress run'",
-    "test:e2e:dev": "start-server-and-test 'npm run dev' http://localhost:5173 'cypress run'",
-    "test:e2e:open": "start-server-and-test 'npm run dev' http://localhost:5173 'cypress open'",
+    "test:e2e": "npm run build && start-server-and-test 'npm run preview -- --port 5173 --strictPort' http://localhost:5173 'cypress run'",
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "test:e2e:dev": "start-server-and-test 'npm run dev -- --port 5173 --strictPort' http://localhost:5173 'cypress run'",
+    "test:e2e:open": "start-server-and-test 'npm run dev -- --port 5173 --strictPort' http://localhost:5173 'cypress open'",
     "lint": "eslint src tests --ext .ts,.vue",
     "lint:fix": "eslint src tests --ext .ts,.vue --fix",
     "format": "prettier --write \"src/**/*.{ts,vue}\" \"tests/**/*.ts\""
@@ -19,6 +20,7 @@
     "chart.js": "^4.5.1",
     "chartjs-plugin-datalabels": "^2.2.0",
     "fflate": "^0.8.2",
+    "marked": "^17.0.1",
     "vue": "^3.4.0"
   },
   "devDependencies": {

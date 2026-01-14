@@ -29,7 +29,7 @@ describe("Reading", () => {
 
     const reading = Reading.create({
       timestamp,
-      temperatureC: 10,
+      temperatureC: null,
       sunshineMinutes: null,
       precipitationMm: null,
       windSpeedKmh: null,
@@ -38,6 +38,7 @@ describe("Reading", () => {
       kind: "hourly",
     });
 
+    expect(reading.temperatureC).toBeNull();
     expect(reading.windSpeedKmh).toBeNull();
     expect(reading.windDirectionDeg).toBeNull();
     expect(reading.pressureHpa).toBeNull();

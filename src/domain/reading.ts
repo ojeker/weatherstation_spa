@@ -22,7 +22,7 @@ const MAX_SUNSHINE_MINUTES: Record<ReadingKind, number> = {
 export class Reading {
   private constructor(
     readonly timestamp: Timestamp,
-    readonly temperatureC: number,
+    readonly temperatureC: number | null,
     readonly sunshineMinutes: number | null,
     readonly precipitationMm: number | null,
     readonly windSpeedKmh: number | null,
@@ -33,7 +33,7 @@ export class Reading {
 
   static create(params: {
     timestamp: Timestamp;
-    temperatureC: number;
+    temperatureC: number | null;
     sunshineMinutes: number | null;
     precipitationMm: number | null;
     windSpeedKmh: number | null;
@@ -45,17 +45,19 @@ export class Reading {
       throw new InvalidValueError("Reading timestamp is required.");
     }
 
-    if (!Number.isFinite(params.temperatureC)) {
-      throw new InvalidValueError("Temperature must be a finite number.");
-    }
-
-    if (
-      params.temperatureC < TEMPERATURE_RANGE_C.min ||
-      params.temperatureC > TEMPERATURE_RANGE_C.max
-    ) {
-      throw new InvalidValueError(
-        `Temperature must be between ${TEMPERATURE_RANGE_C.min} and ${TEMPERATURE_RANGE_C.max} °C.`,
-      );
+    const temperatureC = params.temperatureC;
+    if (temperatureC !== null) {
+      if (!Number.isFinite(temperatureC)) {
+        throw new InvalidValueError("Temperature must be a finite number or null.");
+      }
+      if (
+        temperatureC < TEMPERATURE_RANGE_C.min ||
+        temperatureC > TEMPERATURE_RANGE_C.max
+      ) {
+        throw new InvalidValueError(
+          `Temperature must be between ${TEMPERATURE_RANGE_C.min} and ${TEMPERATURE_RANGE_C.max} °C.`,
+        );
+      }
     }
 
     const sunshineLimit = MAX_SUNSHINE_MINUTES[params.kind];
@@ -119,7 +121,7 @@ export class Reading {
 
     return new Reading(
       params.timestamp,
-      params.temperatureC,
+      temperatureC,
       sunshineMinutes,
       precipitationMm,
       windSpeedKmh,

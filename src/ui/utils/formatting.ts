@@ -30,10 +30,17 @@ export function generateTempSpark(readings: readonly Reading[]): SparkData {
   }
 
   const temps = readings.map((r) => r.temperatureC);
-  const min = Math.min(...temps);
-  const max = Math.max(...temps);
+  const numericTemps = temps.filter((t): t is number => t !== null);
+  if (numericTemps.length === 0) {
+    return { bars: "", summary: "no data" };
+  }
 
-  const bars = temps.map((t) => valueToBlock(t, min, max)).join("");
+  const min = Math.min(...numericTemps);
+  const max = Math.max(...numericTemps);
+
+  const bars = temps
+    .map((t) => (t === null ? " " : valueToBlock(t, min, max)))
+    .join("");
   const summary = `${Math.round(min)}° → ${Math.round(max)}°`;
 
   return { bars, summary };
@@ -106,7 +113,8 @@ export function formatDistanceKm(distanceKm: number): string {
 }
 
 /** Formats temperature with degree symbol and one decimal place. */
-export function formatTemperature(celsius: number): string {
+export function formatTemperature(celsius: number | null): string {
+  if (celsius === null) return "—";
   return `${celsius.toFixed(1)}°C`;
 }
 

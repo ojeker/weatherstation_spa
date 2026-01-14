@@ -31,6 +31,7 @@ The CSV includes a `station_abbr` column (e.g. `GOE`) but station selection is d
 - CSV delimiter: `;`
 - Required columns:
   - `reference_timestamp` (format: `DD.MM.YYYY HH:mm`)
+- Optional columns (missing values allowed):
   - `tre200s0` temperature current (°C)
   - `sre000z0` sunshine duration last 10 minutes
   - `rre150z0` precipitation sum last 10 minutes (mm)
@@ -42,6 +43,7 @@ The CSV includes a `station_abbr` column (e.g. `GOE`) but station selection is d
 - CSV delimiter: `;`
 - Required columns:
   - `reference_timestamp` (format: `DD.MM.YYYY HH:mm`)
+- Optional columns (missing values allowed):
   - `tre200h0` hourly average temperature (°C)
   - `sre000h0` hourly sunshine duration
   - `rre150h0` hourly precipitation sum (mm)

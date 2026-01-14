@@ -102,14 +102,24 @@ function handleChangeStation() {
 }
 
 onMounted(async () => {
-  if (stationProvider.hasStoredStation()) {
+  const abbreviation = stationProvider.getStation().abbreviation;
+  selectedStation.value = {
+    abbreviation,
+    name: abbreviation,
+    heightM: 0,
+    e: 0,
+    n: 0,
+  };
+  await load();
+
+  try {
     const stations = await stationMetaRepository.getStations();
-    const savedAbbreviation = stationProvider.getStation().abbreviation;
-    const station = stations.find((s: StationMeta) => s.abbreviation === savedAbbreviation);
+    const station = stations.find((s: StationMeta) => s.abbreviation === abbreviation);
     if (station) {
       selectedStation.value = station;
-      load();
     }
+  } catch {
+    // Keep the fallback station meta when station list fails to load.
   }
 });
 </script>
@@ -128,6 +138,7 @@ onMounted(async () => {
         v-else-if="state.status === 'error'"
         :message="getErrorMessage(state.error)"
         @retry="load"
+        @choose-station="handleChangeStation"
       />
 
       <template v-else-if="state.status === 'success' || isRefreshing">

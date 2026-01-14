@@ -10,8 +10,8 @@ export const VALID_HOURLY_CSV = `reference_timestamp;station_abbr;tre200h0;sre00
 11.01.2026 10:00;GOE;9.2;55;0.0;3.2;190;1015.0`;
 
 /** CSV missing required column */
-export const MISSING_COLUMN_CSV = `reference_timestamp;station_abbr;tre200s0;sre000z0
-11.01.2026 13:20;GOE;12.3;8`;
+export const MISSING_COLUMN_CSV = `station_abbr;tre200s0;sre000z0
+GOE;12.3;8`;
 
 /** CSV with wrong station */
 export const WRONG_STATION_CSV = `reference_timestamp;station_abbr;tre200s0;sre000z0;rre150z0;fkl010z0;dkl010z0;pp0qnhs0

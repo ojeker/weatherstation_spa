@@ -31,7 +31,7 @@ describe("Weather Dashboard", () => {
       cy.contains("GOE").should("be.visible");
 
       // Current temperature
-      cy.contains("12°C").should("be.visible");
+      cy.contains("12.3°C").should("be.visible");
 
       // Sunshine and precipitation icons
       cy.contains("☀").should("be.visible");
@@ -107,7 +107,7 @@ describe("Weather Dashboard", () => {
 
       cy.wait(["@getCurrentDataRetry", "@getHourlyDataRetry"]);
 
-      cy.contains("12°C").should("be.visible");
+      cy.contains("12.3°C").should("be.visible");
     });
   });
 });

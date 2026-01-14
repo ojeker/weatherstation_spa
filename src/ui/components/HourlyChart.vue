@@ -45,7 +45,7 @@ const chartData = computed(() => {
     })
   );
 
-  const temperatures = readings.map((r) => r.temperatureC);
+  const temperatures = readings.map((r) => r.temperatureC ?? null);
 
   // Wind speed in km/h
   const windSpeeds = readings.map((r) => r.windSpeedKmh ?? 0);
@@ -90,8 +90,11 @@ function createChart() {
   const yMin = data.minPrecip < 0 ? Math.min(data.minPrecip * 1.2, -10) : -10;
 
   // Temperature range for secondary axis
-  const tempMin = Math.min(...data.temperatures) - 2;
-  const tempMax = Math.max(...data.temperatures) + 2;
+  const numericTemps = data.temperatures.filter(
+    (value): value is number => value !== null
+  );
+  const tempMin = numericTemps.length > 0 ? Math.min(...numericTemps) - 2 : 0;
+  const tempMax = numericTemps.length > 0 ? Math.max(...numericTemps) + 2 : 1;
 
   // Wind speed range for left axis
   const windMin = 0;
@@ -193,7 +196,8 @@ function createChart() {
           callbacks: {
             label: (context) => {
               const label = context.dataset.label || "";
-              const value = context.raw as number;
+              const value = context.raw as number | null;
+              if (value === null) return `${label}: —`;
               if (label === "Temperature") return `${label}: ${value.toFixed(1)}°C`;
               if (label === "Wind") return `${label}: ${Math.round(value)} km/h`;
               if (label === "Sunshine") return `${label}: ${Math.round(value)}%`;

@@ -161,6 +161,7 @@ watch(filteredPlaces, (places) => {
           v-else-if="placesState.status === 'error'"
           :message="placeStatusMessage ?? 'Failed to load places.'"
           @retry="loadPlaces"
+          @choose-station="clearSelection"
         />
         <p v-else-if="placeStatusMessage" class="hint">
           {{ placeStatusMessage }}
@@ -197,6 +198,7 @@ watch(filteredPlaces, (places) => {
         v-else-if="stationsState.status === 'error'"
         message="Failed to load stations."
         @retry="selectedPlace && selectPlace(selectedPlace)"
+        @choose-station="clearSelection"
       />
       <p v-else-if="stationsState.status === 'idle'" class="hint">
         Select a place to see the nearest stations.

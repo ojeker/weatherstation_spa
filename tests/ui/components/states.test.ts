@@ -30,9 +30,10 @@ describe("ErrorState", () => {
       },
     });
 
-    const button = wrapper.find("button");
-    expect(button.exists()).toBe(true);
-    expect(button.text()).toContain("Try again");
+    const buttons = wrapper.findAll("button");
+    expect(buttons.length).toBe(2);
+    expect(buttons[0].text()).toContain("Try again");
+    expect(buttons[1].text()).toContain("Choose station");
   });
 
   it("emits retry event when button clicked", async () => {
@@ -42,9 +43,21 @@ describe("ErrorState", () => {
       },
     });
 
-    await wrapper.find("button").trigger("click");
+    await wrapper.find(".retry-button").trigger("click");
 
     expect(wrapper.emitted("retry")).toBeTruthy();
+  });
+
+  it("emits choose-station event when button clicked", async () => {
+    const wrapper = mount(ErrorState, {
+      props: {
+        message: "Error",
+      },
+    });
+
+    await wrapper.find(".choose-button").trigger("click");
+
+    expect(wrapper.emitted("choose-station")).toBeTruthy();
   });
 });
 

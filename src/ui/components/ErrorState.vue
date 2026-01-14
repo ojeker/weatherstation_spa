@@ -5,6 +5,7 @@ defineProps<{
 
 defineEmits<{
   retry: [];
+  "choose-station": [];
 }>();
 </script>
 
@@ -12,9 +13,12 @@ defineEmits<{
   <div class="error-state">
     <div class="icon">⚠</div>
     <p class="message">{{ message }}</p>
-    <button class="retry-button" @click="$emit('retry')">
-      Try again
-    </button>
+    <div class="actions">
+      <button class="retry-button" @click="$emit('retry')">Try again</button>
+      <button class="choose-button" @click="$emit('choose-station')">
+        Choose station
+      </button>
+    </div>
   </div>
 </template>
 
@@ -39,8 +43,15 @@ defineEmits<{
   max-width: 280px;
 }
 
-.retry-button {
+.actions {
   margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.retry-button {
   padding: 0.6rem 1.5rem;
   background: #4a90d9;
   color: white;
@@ -57,5 +68,24 @@ defineEmits<{
 
 .retry-button:active {
   background: #2d6cb5;
+}
+
+.choose-button {
+  padding: 0.6rem 1.2rem;
+  background: #e2e8f0;
+  color: #0f172a;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.choose-button:hover {
+  background: #cbd5f5;
+}
+
+.choose-button:active {
+  background: #b4c6ee;
 }
 </style>

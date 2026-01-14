@@ -11,12 +11,6 @@ describe("validateRequiredColumns", () => {
     const rows = [
       {
         reference_timestamp: "11.01.2026 13:20",
-        tre200s0: "12.3",
-        sre000z0: "8",
-        rre150z0: "0.5",
-        fkl010z0: "5.0",
-        dkl010z0: "180",
-        pp0qnhs0: "1013.25",
       },
     ];
 
@@ -28,7 +22,6 @@ describe("validateRequiredColumns", () => {
   it("throws SchemaMismatchError when column is missing", () => {
     const rows = [
       {
-        reference_timestamp: "11.01.2026 13:20",
         tre200s0: "12.3",
         sre000z0: "8",
       },
@@ -40,11 +33,11 @@ describe("validateRequiredColumns", () => {
   });
 
   it("includes missing column names in error message", () => {
-    const rows = [{ reference_timestamp: "11.01.2026 13:20" }];
+    const rows = [{ tre200s0: "12.3" }];
 
     expect(() =>
       validateRequiredColumns(rows, CURRENT_READING_COLUMNS)
-    ).toThrow(/tre200s0/);
+    ).toThrow(/reference_timestamp/);
   });
 
   it("does not throw for empty rows array", () => {

@@ -27,6 +27,10 @@ describe("parseNumericValue", () => {
     expect(parseNumericValue("   ", "field")).toBeNull();
   });
 
+  it("returns null for undefined", () => {
+    expect(parseNumericValue(undefined, "field")).toBeNull();
+  });
+
   it("throws InvalidValueError for non-numeric string", () => {
     expect(() => parseNumericValue("abc", "field")).toThrow(InvalidValueError);
   });
@@ -92,7 +96,7 @@ describe("mapCurrentReading", () => {
     expect(reading.pressureHpa).toBeNull();
   });
 
-  it("throws when temperature is missing", () => {
+  it("allows missing temperature", () => {
     const row = {
       reference_timestamp: "11.01.2026 13:20",
       tre200s0: "",
@@ -103,7 +107,9 @@ describe("mapCurrentReading", () => {
       pp0qnhs0: "",
     };
 
-    expect(() => mapCurrentReading(row)).toThrow(InvalidValueError);
+    const reading = mapCurrentReading(row);
+
+    expect(reading.temperatureC).toBeNull();
   });
 });
 

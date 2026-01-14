@@ -3,22 +3,10 @@ import type { CsvRow } from "./csv-parser";
 
 export const CURRENT_READING_COLUMNS = [
   "reference_timestamp",
-  "tre200s0",
-  "sre000z0",
-  "rre150z0",
-  "fkl010z0",
-  "dkl010z0",
-  "pp0qnhs0",
 ] as const;
 
 export const HOURLY_READING_COLUMNS = [
   "reference_timestamp",
-  "tre200h0",
-  "sre000h0",
-  "rre150h0",
-  "fkl010h0",
-  "dkl010h0",
-  "pp0qnhh0",
 ] as const;
 
 export const PLACE_COLUMNS = [
