@@ -14,6 +14,7 @@ import CurrentReading from "../components/CurrentReading.vue";
 import HourlyChart from "../components/HourlyChart.vue";
 import LoadingSpinner from "../components/LoadingSpinner.vue";
 import ErrorState from "../components/ErrorState.vue";
+import ErrorToast from "../components/ErrorToast.vue";
 import EmptyState from "../components/EmptyState.vue";
 import PlaceStationSelector from "../components/PlaceStationSelector.vue";
 import { stationProvider, stationMetaRepository } from "../di";
@@ -128,6 +129,7 @@ onMounted(async () => {
   <main class="dashboard">
     <PlaceStationSelector
       v-if="!selectedStation"
+      :on-choose-station="handleChangeStation"
       @station-selected="handleStationSelected"
     />
 
@@ -137,12 +139,14 @@ onMounted(async () => {
       <ErrorState
         v-else-if="state.status === 'error'"
         :message="getErrorMessage(state.error)"
-        @retry="load"
-        @choose-station="handleChangeStation"
       />
 
       <template v-else-if="state.status === 'success' || isRefreshing">
-        <EmptyState v-if="isEmpty" :station-name="stationName" />
+        <EmptyState
+          v-if="isEmpty"
+          :station-name="stationName"
+          @choose-station="handleChangeStation"
+        />
 
         <template v-else>
           <StationHeader
@@ -170,6 +174,13 @@ onMounted(async () => {
         </template>
       </template>
     </template>
+
+    <ErrorToast
+      v-if="state.status === 'error'"
+      :message="getErrorMessage(state.error)"
+      @retry="load"
+      @choose-station="handleChangeStation"
+    />
   </main>
 </template>
 

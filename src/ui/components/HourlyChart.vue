@@ -35,6 +35,10 @@ const props = defineProps<{
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
 
+const windGridStyle = computed(() => ({
+  gridTemplateColumns: `repeat(${props.readings.length}, minmax(0, 1fr))`,
+}));
+
 const chartData = computed(() => {
   const readings = props.readings;
 
@@ -290,6 +294,29 @@ watch(() => props.readings, updateChart, { deep: true });
     <div class="chart-container">
       <canvas ref="canvasRef"></canvas>
     </div>
+    <div
+      v-if="props.readings.length > 0"
+      class="wind-direction-row"
+      :style="windGridStyle"
+      aria-label="Wind direction for the last 8 hours"
+    >
+      <span
+      v-for="(reading, index) in props.readings"
+        :key="`${reading.timestamp.toDate().toISOString()}-${index}`"
+        class="wind-direction-cell"
+      >
+        <span
+          v-if="reading.windDirectionDeg !== null"
+          class="wind-direction-arrow"
+          role="img"
+          :aria-label="`Wind direction ${Math.round(reading.windDirectionDeg)} degrees`"
+          :style="{ transform: `rotate(${reading.windDirectionDeg}deg)` }"
+        >
+          ▲
+        </span>
+        <span v-else class="wind-direction-missing">—</span>
+      </span>
+    </div>
     <div class="legend-hint">
       <span class="hint"><span class="icon-sun">☀</span> %</span>
       <span class="hint"><span class="icon-precip">💧</span> mm</span>
@@ -307,6 +334,34 @@ watch(() => props.readings, updateChart, { deep: true });
   position: relative;
   height: 220px;
   width: 100%;
+}
+
+.wind-direction-row {
+  display: grid;
+  align-items: center;
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.wind-direction-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.2rem;
+}
+
+.wind-direction-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #22c55e;
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.wind-direction-missing {
+  color: #cbd5f5;
 }
 
 .legend-hint {

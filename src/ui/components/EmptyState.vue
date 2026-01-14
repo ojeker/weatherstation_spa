@@ -2,6 +2,10 @@
 defineProps<{
   stationName: string;
 }>();
+
+defineEmits<{
+  "choose-station": [];
+}>();
 </script>
 
 <template>
@@ -10,6 +14,9 @@ defineProps<{
     <p class="message">
       No data available for today for station {{ stationName }}.
     </p>
+    <button class="choose-button" type="button" @click="$emit('choose-station')">
+      Choose station
+    </button>
   </div>
 </template>
 
@@ -31,5 +38,25 @@ defineProps<{
 .message {
   color: #666;
   font-size: 0.95rem;
+}
+
+.choose-button {
+  margin-top: 0.25rem;
+  padding: 0.6rem 1.2rem;
+  background: #e2e8f0;
+  color: #0f172a;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.choose-button:hover {
+  background: #cbd5f5;
+}
+
+.choose-button:active {
+  background: #b4c6ee;
 }
 </style>

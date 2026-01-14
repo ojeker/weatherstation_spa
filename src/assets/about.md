@@ -22,4 +22,9 @@ The source code of this web application was written in [vue](https://vuejs.org/)
 
 ## Version
 
-1.0.0
+1.0
+
+Todo:
+- Blatten bug
+- Windrichtungen: Pfeile oder SW, NW. Wo dies platzieren, wird in mehreren ui-komponenten gebraucht
+- Layouting: Eggishorn

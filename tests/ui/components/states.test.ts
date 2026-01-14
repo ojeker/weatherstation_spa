@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { mount } from "@vue/test-utils";
 import LoadingSpinner from "@/ui/components/LoadingSpinner.vue";
 import ErrorState from "@/ui/components/ErrorState.vue";
+import ErrorToast from "@/ui/components/ErrorToast.vue";
 import EmptyState from "@/ui/components/EmptyState.vue";
 
 describe("LoadingSpinner", () => {
@@ -22,9 +23,21 @@ describe("ErrorState", () => {
 
     expect(wrapper.text()).toContain("Network error occurred");
   });
+});
 
-  it("displays retry button", () => {
-    const wrapper = mount(ErrorState, {
+describe("ErrorToast", () => {
+  it("displays error message", () => {
+    const wrapper = mount(ErrorToast, {
+      props: {
+        message: "Something went wrong",
+      },
+    });
+
+    expect(wrapper.text()).toContain("Something went wrong");
+  });
+
+  it("displays retry and choose station buttons", () => {
+    const wrapper = mount(ErrorToast, {
       props: {
         message: "Error",
       },
@@ -37,7 +50,7 @@ describe("ErrorState", () => {
   });
 
   it("emits retry event when button clicked", async () => {
-    const wrapper = mount(ErrorState, {
+    const wrapper = mount(ErrorToast, {
       props: {
         message: "Error",
       },
@@ -49,7 +62,7 @@ describe("ErrorState", () => {
   });
 
   it("emits choose-station event when button clicked", async () => {
-    const wrapper = mount(ErrorState, {
+    const wrapper = mount(ErrorToast, {
       props: {
         message: "Error",
       },
@@ -71,5 +84,17 @@ describe("EmptyState", () => {
 
     expect(wrapper.text()).toContain("Zurich Fluntern");
     expect(wrapper.text()).toContain("No data available");
+  });
+
+  it("emits choose-station when button clicked", async () => {
+    const wrapper = mount(EmptyState, {
+      props: {
+        stationName: "Zurich Fluntern",
+      },
+    });
+
+    await wrapper.find("button").trigger("click");
+
+    expect(wrapper.emitted("choose-station")).toBeTruthy();
   });
 });

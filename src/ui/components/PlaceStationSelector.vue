@@ -11,9 +11,14 @@ import { usePlaceSelection } from "@/ui/composables";
 import { formatDistanceKm } from "@/ui/utils";
 import LoadingSpinner from "@/ui/components/LoadingSpinner.vue";
 import ErrorState from "@/ui/components/ErrorState.vue";
+import ErrorToast from "@/ui/components/ErrorToast.vue";
 import SplitLayout from "@/ui/components/SplitLayout.vue";
 
 import type { StationMeta } from "@/domain";
+
+const props = defineProps<{
+  onChooseStation: () => void;
+}>();
 
 const emit = defineEmits<{
   "station-selected": [station: StationMeta];
@@ -49,6 +54,26 @@ const placeStatusMessage = computed(() => {
   if (filteredPlaces.value.length === 0) return "No matches.";
   return null;
 });
+
+const toastMessage = computed(() => {
+  if (placesState.value.status === "error") {
+    return placeStatusMessage.value ?? "Failed to load places.";
+  }
+  if (stationsState.value.status === "error") {
+    return "Failed to load stations.";
+  }
+  return null;
+});
+
+function handleToastRetry() {
+  if (placesState.value.status === "error") {
+    loadPlaces();
+  } else if (stationsState.value.status === "error") {
+    if (selectedPlace.value) {
+      selectPlace(selectedPlace.value);
+    }
+  }
+}
 
 function setOptionRef(
   el: Element | ComponentPublicInstance | null,
@@ -117,7 +142,8 @@ watch(filteredPlaces, (places) => {
 </script>
 
 <template>
-  <SplitLayout class="selector">
+  <div class="selector-wrapper">
+    <SplitLayout class="selector">
     <template #primary>
       <div class="panel-header">
         <div>
@@ -160,8 +186,6 @@ watch(filteredPlaces, (places) => {
         <ErrorState
           v-else-if="placesState.status === 'error'"
           :message="placeStatusMessage ?? 'Failed to load places.'"
-          @retry="loadPlaces"
-          @choose-station="clearSelection"
         />
         <p v-else-if="placeStatusMessage" class="hint">
           {{ placeStatusMessage }}
@@ -197,8 +221,6 @@ watch(filteredPlaces, (places) => {
       <ErrorState
         v-else-if="stationsState.status === 'error'"
         message="Failed to load stations."
-        @retry="selectedPlace && selectPlace(selectedPlace)"
-        @choose-station="clearSelection"
       />
       <p v-else-if="stationsState.status === 'idle'" class="hint">
         Select a place to see the nearest stations.
@@ -221,10 +243,21 @@ watch(filteredPlaces, (places) => {
         </button>
       </div>
     </template>
-  </SplitLayout>
+    </SplitLayout>
+    <ErrorToast
+      v-if="toastMessage"
+      :message="toastMessage"
+      @retry="handleToastRetry"
+      @choose-station="props.onChooseStation"
+    />
+  </div>
 </template>
 
 <style scoped>
+.selector-wrapper {
+  position: relative;
+}
+
 .selector {
   margin: 1rem 0 1.5rem;
   --ui-font-body: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
