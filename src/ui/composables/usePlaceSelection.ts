@@ -9,6 +9,28 @@ import {
   loadPlacesUseCase,
 } from "@/ui/di";
 
+const PLACE_STORAGE_KEY = "weatherstation_selectedPlace";
+
+function savePlace(place: Place | null): void {
+  if (place) {
+    localStorage.setItem(PLACE_STORAGE_KEY, JSON.stringify(place));
+  } else {
+    localStorage.removeItem(PLACE_STORAGE_KEY);
+  }
+}
+
+function loadSavedPlace(): Place | null {
+  const saved = localStorage.getItem(PLACE_STORAGE_KEY);
+  if (saved) {
+    try {
+      return JSON.parse(saved) as Place;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export type PlacesState =
   | { status: "idle" }
   | { status: "loading" }
@@ -25,7 +47,8 @@ export function usePlaceSelection() {
   const query = ref("");
   const placesState = ref<PlacesState>({ status: "idle" });
   const stationsState = ref<StationsState>({ status: "idle" });
-  const selectedPlace = ref<Place | null>(null);
+  const savedPlace = loadSavedPlace();
+  const selectedPlace = ref<Place | null>(savedPlace);
 
   const normalizedQuery = computed(() => normalizeQuery(query.value));
 
@@ -52,6 +75,7 @@ export function usePlaceSelection() {
 
   async function selectPlace(place: Place) {
     selectedPlace.value = place;
+    savePlace(place);
     stationsState.value = { status: "loading" };
 
     try {
@@ -67,7 +91,14 @@ export function usePlaceSelection() {
 
   function clearSelection() {
     selectedPlace.value = null;
+    savePlace(null);
     stationsState.value = { status: "idle" };
+  }
+
+  async function restoreSavedSelection() {
+    if (savedPlace) {
+      await selectPlace(savedPlace);
+    }
   }
 
   return {
@@ -80,5 +111,6 @@ export function usePlaceSelection() {
     loadPlaces,
     selectPlace,
     clearSelection,
+    restoreSavedSelection,
   };
 }

@@ -29,6 +29,7 @@ const {
   loadPlaces,
   selectPlace,
   clearSelection,
+  restoreSavedSelection,
 } = usePlaceSelection();
 
 const activeIndex = ref(-1);
@@ -36,6 +37,7 @@ const optionRefs = ref<Element[]>([]);
 
 onMounted(() => {
   loadPlaces();
+  restoreSavedSelection();
 });
 
 const hasQuery = computed(() => normalizedQuery.value.length > 0);
