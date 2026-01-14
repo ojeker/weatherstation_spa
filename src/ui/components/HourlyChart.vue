@@ -51,6 +51,8 @@ const props = defineProps<{
 const canvasRef = ref<HTMLCanvasElement | null>(null);
 let chartInstance: Chart | null = null;
 
+const PRECIP_CAP_MM = 6;
+
 const WIND_ICONS = [
   { key: "n", label: "N", url: nIcon },
   { key: "nne", label: "NNE", url: nneIcon },
@@ -118,14 +120,19 @@ const chartData = computed(() => {
     r.sunshineMinutes !== null ? (r.sunshineMinutes / maxSunMinutes) * 100 : 0
   );
 
-  // Precipitation as positive values
-  const precipValues = readings.map((r) =>
+  // Precipitation as positive values (with capping for display)
+  const precipValuesRaw = readings.map((r) =>
     r.precipitationMm !== null ? r.precipitationMm : 0
+  );
+  const precipValuesCapped = precipValuesRaw.map((value) =>
+    Math.min(value, PRECIP_CAP_MM)
+  );
+  const precipValuesScaled = precipValuesCapped.map(
+    (value) => (value / PRECIP_CAP_MM) * 100
   );
 
   // Calculate axis bounds
   const maxSun = Math.max(...sunshinePercent, 100);
-  const maxPrecip = Math.max(...precipValues, 0);
 
   return {
     labels,
@@ -133,9 +140,10 @@ const chartData = computed(() => {
     windSpeeds,
     windDirections,
     sunshinePercent,
-    precipValues,
+    precipValuesRaw,
+    precipValuesCapped,
+    precipValuesScaled,
     maxSun,
-    maxPrecip,
   };
 });
 
@@ -147,7 +155,7 @@ function createChart() {
   if (!ctx) return;
 
   // Calculate y-axis range to accommodate both sunshine and precip
-  const yMax = Math.max(data.maxSun, 100);
+  const yMax = 100;
   const yMin = 0;
 
   // Temperature range for secondary axis
@@ -158,8 +166,13 @@ function createChart() {
   const tempMax = numericTemps.length > 0 ? Math.max(...numericTemps) + 2 : 1;
 
   // Wind speed range for left axis
-  const windMin = 0;
-  const windMax = Math.max(...data.windSpeeds, 20) * 1.1;
+  const numericWindSpeeds = data.windSpeeds.filter(
+    (value): value is number => Number.isFinite(value)
+  );
+  const windMinRaw = numericWindSpeeds.length > 0 ? Math.min(...numericWindSpeeds) : 0;
+  const windMaxRaw = numericWindSpeeds.length > 0 ? Math.max(...numericWindSpeeds) : 1;
+  const windMin = Math.max(0, windMinRaw - 2);
+  const windMax = windMaxRaw + 2;
 
   chartInstance = new Chart(ctx, {
     type: "bar",
@@ -216,9 +229,17 @@ function createChart() {
           yAxisID: "yBars",
           datalabels: {
             anchor: "end",
-            align: "end",
+            align: (context) => {
+              const value = data.sunshinePercent[context.dataIndex] ?? 0;
+              return value > 60 ? "start" : "end";
+            },
+            clamp: true,
+            clip: false,
             formatter: (value: number) => (value > 0 ? `${Math.round(value)}%` : ""),
-            color: "#866d0d",
+            color: (context) => {
+              const value = data.sunshinePercent[context.dataIndex] ?? 0;
+              return value > 60 ? "#3f2f00" : "#866d0d";
+            },
             font: { size: 10, weight: "bold" },
           },
           order: 1,
@@ -226,17 +247,27 @@ function createChart() {
         {
           type: "bar",
           label: "Precipitation",
-          data: data.precipValues,
+          data: data.precipValuesScaled,
           backgroundColor: "rgba(52, 152, 219, 0.7)",
           borderColor: "#3498db",
           borderWidth: 1,
           yAxisID: "yBars",
           datalabels: {
             anchor: "end",
-            align: "end",
-            formatter: (value: number) =>
-              value > 0 ? `${value.toFixed(1)}` : "",
-            color: "#1a5276",
+            align: (context) => {
+              const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
+              return rawValue > PRECIP_CAP_MM * 0.6 ? "start" : "end";
+            },
+            formatter: (_value: number, context) => {
+              const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
+              if (rawValue <= 0) return "";
+              const suffix = rawValue > PRECIP_CAP_MM ? "!" : "";
+              return `${rawValue.toFixed(1)}${suffix}`;
+            },
+            color: (context) => {
+              const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
+              return rawValue > PRECIP_CAP_MM * 0.6 ? "#0b2a3d" : "#1a5276";
+            },
             font: { size: 10, weight: "bold" },
           },
           order: 2,
@@ -246,6 +277,11 @@ function createChart() {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      layout: {
+        padding: {
+          top: 8,
+        },
+      },
       interaction: {
         mode: "index",
         intersect: false,
@@ -274,7 +310,10 @@ function createChart() {
                 return `${label}: ${Math.round(value)} km/h${directionLabel ? ` · ${directionLabel}` : ""}`;
               }
               if (label === "Sunshine") return `${label}: ${Math.round(value)}%`;
-              if (label === "Precipitation") return `${label}: ${value.toFixed(1)}mm`;
+              if (label === "Precipitation") {
+                const rawValue = data.precipValuesRaw[context.dataIndex] ?? 0;
+                return `${label}: ${rawValue.toFixed(1)}mm`;
+              }
               return `${label}: ${value}`;
             },
           },
@@ -311,7 +350,7 @@ function createChart() {
             display: false,
           },
           ticks: {
-            callback: (value) => `${value}°`,
+            callback: (value) => `${Number(value).toFixed(1)}°`,
             font: { size: 10 },
             color: "#e74c3c",
           },
@@ -325,7 +364,7 @@ function createChart() {
             display: false,
           },
           ticks: {
-            callback: (value) => `${value}`,
+            callback: (value) => `${Math.round(Number(value))}`,
             font: { size: 10 },
             color: "#22c55e",
           },
@@ -363,74 +402,62 @@ watch(() => props.readings, updateChart, { deep: true });
     <div class="chart-container">
       <canvas ref="canvasRef"></canvas>
     </div>
-    <div
-      v-if="props.readings.length > 0"
-      class="wind-direction-row"
-      :style="windGridStyle"
-      aria-label="Wind direction for the last 8 hours"
-    >
-      <span
-      v-for="(reading, index) in props.readings"
-        :key="`${reading.timestamp.toDate().toISOString()}-${index}`"
-        class="wind-direction-cell"
-      >
-        <span
-          v-if="reading.windDirectionDeg !== null"
-          class="wind-direction-arrow"
-          role="img"
-          :aria-label="`Wind direction ${Math.round(reading.windDirectionDeg)} degrees`"
-          :style="{ transform: `rotate(${reading.windDirectionDeg}deg)` }"
-        >
-          ▲
-        </span>
-        <span v-else class="wind-direction-missing">—</span>
-      </span>
-    </div>
     <div class="legend-hint">
+      <span class="hint"><span class="icon-temp">🌡</span> °C</span>
+      <span class="hint">
+        <span class="icon-wind" aria-hidden="true">
+          <svg viewBox="0 0 24 24" role="img" aria-label="Wind">
+            <path
+              d="M3 9h11.5a2.5 2.5 0 1 0-2.2-3.7"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M3 13h14.5a2.5 2.5 0 1 1-2.2 3.7"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M3 17h9"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </svg>
+        </span>
+        km/h
+      </span>
       <span class="hint"><span class="icon-sun">☀</span> %</span>
       <span class="hint"><span class="icon-precip">💧</span> mm</span>
     </div>
+    <p class="legend-note">
+      Precipitation bars are scaled so {{ PRECIP_CAP_MM }}mm is full height;
+      labels show actual values (! indicates capped).
+    </p>
   </section>
 </template>
 
 <style scoped>
 .hourly-chart {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   padding: 0.75rem;
   border-top: 1px solid #eee;
 }
 
 .chart-container {
   position: relative;
-  height: 220px;
+  flex: 1;
+  min-height: 220px;
   width: 100%;
-}
-
-.wind-direction-row {
-  display: grid;
-  align-items: center;
-  margin-top: 0.35rem;
-  font-size: 0.75rem;
-  color: #64748b;
-}
-
-.wind-direction-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 1.2rem;
-}
-
-.wind-direction-arrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #22c55e;
-  transform-origin: center;
-  transition: transform 0.2s ease;
-}
-
-.wind-direction-missing {
-  color: #cbd5f5;
 }
 
 .legend-hint {
@@ -442,9 +469,30 @@ watch(() => props.readings, updateChart, { deep: true });
   color: #888;
 }
 
+.legend-note {
+  margin-top: 0.35rem;
+  text-align: center;
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
 .icon-sun {
   color: #f1c40f;
 }
+
+.icon-temp {
+  color: #e74c3c;
+}
+
+.icon-wind {
+  color: #22c55e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
 
 .icon-precip {
   color: #3498db;
