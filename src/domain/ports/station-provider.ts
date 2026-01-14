@@ -4,4 +4,5 @@ import type { Station } from "../station";
 export interface StationProvider {
   getStation(): Station;
   setStation(station: Station): void;
+  hasStoredStation(): boolean;
 }

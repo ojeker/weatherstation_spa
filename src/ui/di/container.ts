@@ -24,4 +24,4 @@ export const findNearestStationsUseCase = new FindNearestStationsUseCase(
   stationMetaRepository
 );
 
-export { stationProvider };
+export { stationProvider, stationMetaRepository };

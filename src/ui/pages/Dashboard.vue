@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { Station, type Reading, type StationMeta } from "@/domain";
 import { useWeather } from "../composables";
 import {
@@ -16,7 +16,7 @@ import LoadingSpinner from "../components/LoadingSpinner.vue";
 import ErrorState from "../components/ErrorState.vue";
 import EmptyState from "../components/EmptyState.vue";
 import PlaceStationSelector from "../components/PlaceStationSelector.vue";
-import { stationProvider } from "../di";
+import { stationProvider, stationMetaRepository } from "../di";
 
 const SPARK_BAR_COUNT = 8;
 
@@ -100,6 +100,18 @@ function handleStationSelected(station: StationMeta) {
 function handleChangeStation() {
   selectedStation.value = null;
 }
+
+onMounted(async () => {
+  if (stationProvider.hasStoredStation()) {
+    const stations = await stationMetaRepository.getStations();
+    const savedAbbreviation = stationProvider.getStation().abbreviation;
+    const station = stations.find((s: StationMeta) => s.abbreviation === savedAbbreviation);
+    if (station) {
+      selectedStation.value = station;
+      load();
+    }
+  }
+});
 </script>
 
 <template>

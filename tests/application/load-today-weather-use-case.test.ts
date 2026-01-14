@@ -19,6 +19,7 @@ describe("LoadTodayWeatherUseCase", () => {
     const mockStationProvider: StationProvider = {
       getStation: vi.fn().mockReturnValue(mockStation),
       setStation: vi.fn(),
+      hasStoredStation: vi.fn(),
     };
 
     const mockWeatherRepository: WeatherRepository = {
@@ -43,6 +44,7 @@ describe("LoadTodayWeatherUseCase", () => {
     const mockStationProvider: StationProvider = {
       getStation: vi.fn().mockReturnValue(mockStation),
       setStation: vi.fn(),
+      hasStoredStation: vi.fn(),
     };
 
     const mockWeatherRepository: WeatherRepository = {
@@ -67,6 +69,7 @@ describe("LoadTodayWeatherUseCase", () => {
     const mockStationProvider: StationProvider = {
       getStation: vi.fn().mockImplementation(() => stations[callCount++]),
       setStation: vi.fn(),
+      hasStoredStation: vi.fn(),
     };
 
     const mockWeatherRepository: WeatherRepository = {

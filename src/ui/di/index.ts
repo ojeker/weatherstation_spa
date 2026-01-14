@@ -3,4 +3,5 @@ export {
   loadPlacesUseCase,
   loadTodayWeatherUseCase,
   stationProvider,
+  stationMetaRepository,
 } from "./container";
